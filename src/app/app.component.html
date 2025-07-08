@@ -1,15 +1,15 @@
 <img src="logo-min.svg" alt="" width="16" hidden>
 
 <section>
-  <div>played percent: {{ ngxAudioWave.playedPercent }} ({{ ngxAudioWave.exactPlayedPercent }})</div>
-  <div>current time: {{ ngxAudioWave.currentTime }} ({{ ngxAudioWave.exactCurrentTime }})</div>
+  <div>played percent: {{ ngxAudioWave.playedPercent() }} ({{ ngxAudioWave.exactPlayedPercent() }})</div>
+  <div>current time: {{ ngxAudioWave.currentTime() }} ({{ ngxAudioWave.exactCurrentTime() }})</div>
 
   <ngx-audio-wave
     #ngxAudioWave
     audioSrc="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/shoptalk-clip.mp3"
   ></ngx-audio-wave>
 
-  <div>duration: {{ ngxAudioWave.duration }} ({{ ngxAudioWave.exactDuration }})</div>
+  <div>duration: {{ ngxAudioWave.duration() }} ({{ ngxAudioWave.exactDuration() }})</div>
 </section>
 
 <!-- width -->
@@ -37,17 +37,17 @@
   <b>isLoading</b>
   <ngx-audio-wave #audioRef audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
 
-  @if (!audioRef.isLoading) {
+  @if (!audioRef.isLoading()) {
     <div>
       duration:
-      {{ audioRef.currentTime | toTimer }} / {{ audioRef.duration | toTimer }}
+      {{ audioRef.currentTime() | toTimer }} / {{ audioRef.duration() | toTimer }}
       (no duration while loading)
     </div>
   }
 
   <div>
     duration:
-    {{ audioRef.currentTime | toTimer }} / {{ audioRef.duration | toTimer }}
+    {{ audioRef.currentTime() | toTimer }} / {{ audioRef.duration() | toTimer }}
     (zero will be display while loading)
   </div>
 </section>
@@ -62,10 +62,10 @@
 </section>
 
 <section>
-  <b>Toggle btn (is pause: {{ audioRef2.isPause }})</b>
+  <b>Toggle btn (is pause: {{ audioRef2.isPaused() }})</b>
   <ngx-audio-wave #audioRef2 [hideBtn]="true" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
 
-  @if (audioRef2.isPause) {
+  @if (audioRef2.isPaused()) {
     <button (click)="audioRef2.play()">Play</button>
   } @else {
     <button (click)="audioRef2.pause()">Pause</button>

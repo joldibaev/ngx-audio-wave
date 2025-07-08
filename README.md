@@ -29,15 +29,15 @@ audioSrc = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/shoptalk-clip.mp3';
 
 ```html
 <section>
-  <div>played percent: {{ngxAudioWave.playedPercent}} ({{ngxAudioWave.exactPlayedPercent}})</div>
-  <div>current time: {{ngxAudioWave.currentTime}} ({{ngxAudioWave.exactCurrentTime}})</div>
+  <div>played percent: {{ngxAudioWave.playedPercent()}} ({{ngxAudioWave.exactPlayedPercent()}})</div>
+  <div>current time: {{ngxAudioWave.currentTime()}} ({{ngxAudioWave.exactCurrentTime()}})</div>
 
   <ngx-audio-wave
     #ngxAudioWave
     audioSrc="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/shoptalk-clip.mp3"
   ></ngx-audio-wave>
 
-  <div>duration: {{ngxAudioWave.duration}} ({{ngxAudioWave.exactDuration}})</div>
+  <div>duration: {{ngxAudioWave.duration()}} ({{ngxAudioWave.exactDuration()}})</div>
 </section>
 ```
 
@@ -53,8 +53,10 @@ audioSrc = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/shoptalk-clip.mp3';
 <!-- isLoading -->
 <section>
   <ngx-audio-wave #audioRef color="#ee2133" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-  <div *ngIf="!audioRef.isLoading">duration: {{ngxAudioWave.duration|toTimer}} (no duration while loading)</div>
-  <div>duration: {{ngxAudioWave.duration|toTimer}} (zero will be display while loading)</div>
+  @if(!audioRef.isLoading()){
+    <div>duration: {{ngxAudioWave.duration() | toTimer}} (no duration while loading)</div>
+  }
+  <div>duration: {{ngxAudioWave.duration() | toTimer}} (zero will be display while loading)</div>
 </section>
 
 <!-- height -->
@@ -83,10 +85,14 @@ audioSrc = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/shoptalk-clip.mp3';
 
 ### Toggle btn
 ```html
-<b>Toggle btn (is pause: {{audioRef2.isPause}})</b>
-<ngx-audio-wave #audioRef2 [hideBtn]="true" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-<button *ngIf="audioRef2.isPause" (click)="audioRef2.play()">Play</button>
-<button *ngIf="!audioRef2.isPause" (click)="audioRef2.pause()">Pause</button>
+  <b>Toggle btn (is pause: {{ audioRef2.isPaused() }})</b>
+<ngx-audio-wave #audioRef2 [hideBtn]="true" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
+
+@if (audioRef2.isPaused()) {
+<button (click)="audioRef2.play()">Play</button>
+} @else {
+<button (click)="audioRef2.pause()">Pause</button>
+}
 <button (click)="audioRef2.stop()">Stop</button>
 ```
 
@@ -95,8 +101,11 @@ or you can get access to The HTML ```<audio>``` element inside component
 
 Example:
 ```html
-<button *ngIf="audioRef2.audio?.nativeElement?.paused" (click)="audioRef2.play()">Play</button>
-<button *ngIf="!audioRef2.audio?.nativeElement?.paused" (click)="audioRef2.pause()">Pause</button>
+@if(audioRef2.audio?.nativeElement?.paused) {
+    <button (click)="audioRef1.play()">Play</button>
+} @else {
+    <button (click)="audioRef1.pause()">Pause</button>
+}
 ```
 #### WARNING: using this code will lead to [NG0100: ExpressionChangedAfterItHasBeenCheckedError]
 

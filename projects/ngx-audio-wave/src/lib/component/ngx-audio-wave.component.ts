@@ -1,11 +1,14 @@
 import {
   AfterViewInit,
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   inject,
   input,
+  numberAttribute,
   OnDestroy,
   PLATFORM_ID,
   signal,
@@ -25,21 +28,24 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
-  color = input('#1e90ff');
   audioSrc = input.required<string>();
-  height = input(25);
-  gap = input(5)
-  rounded = input(true);
-  hideBtn = input(false);
 
-  protected _error = signal(false);
-  protected _exactPlayedPercent = signal(0);
-  protected _exactCurrentTime = signal(0);
-  protected _isPause = signal(true);
-  protected _isLoading = signal(true);
+  color = input('#1e90ff');
+  height = input(25, {transform: numberAttribute});
+  gap = input(5, {transform: numberAttribute})
+  rounded = input(true, {transform: booleanAttribute});
+  hideBtn = input(false, {transform: booleanAttribute});
 
-  protected _exactDuration = signal(0);
-  protected _normalizedData = signal<number[]>([]);
+  hasError = signal(false);
+  exactPlayedPercent = signal(0);
+  exactCurrentTime = signal(0);
+  isPaused = signal(true);
+  isLoading = signal(true);
+
+  exactDuration = signal(0);
+  protected normalizedData = signal<number[]>([]);
+
+  protected clipPath = computed(() => `inset(0px ${100 - this.exactPlayedPercent()}% 0px 0px)`)
 
   // injecting
   private readonly platformId = inject(PLATFORM_ID);
@@ -50,41 +56,10 @@ export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
 
   private audioRef = viewChild.required<ElementRef<HTMLAudioElement>>('audioRef');
 
-  get exactPlayedPercent() {
-    return this._exactPlayedPercent();
-  }
-
-  get exactDuration() {
-    return this._exactDuration();
-  }
-
-  get exactCurrentTime() {
-    return this._exactCurrentTime();
-  }
-
-  get isPause() {
-    return this._isPause();
-  }
-
-  get isLoading() {
-    return this._isLoading();
-  }
-
-  get playedPercent() {
-    return Math.round(this._exactPlayedPercent());
-  }
-
-  get currentTime() {
-    return Math.round(this._exactCurrentTime());
-  }
-
-  get duration() {
-    return Math.round(this._exactDuration());
-  }
-
-  get width() {
-    return this.audioWaveService.samples * this.gap();
-  }
+  playedPercent = computed(() => Math.round(this.exactPlayedPercent()))
+  currentTime = computed(() => Math.round(this.exactCurrentTime()))
+  duration = computed(() => Math.round(this.exactDuration()));
+  width = computed(() => this.audioWaveService.samples * this.gap());
 
   ngAfterViewInit() {
     if (this.isPlatformBrowser) {
@@ -98,7 +73,7 @@ export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
     this.stop();
   }
 
-  play(time: number = 0) {
+  play(time = 0) {
     if (!this.isPlatformBrowser) return;
 
     const audio = this.audioRef().nativeElement;
@@ -132,9 +107,9 @@ export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
     const offsetX = mouseEvent.offsetX;
     const width = this.width;
 
-    const clickPercent = this.calculatePercent(width, offsetX);
+    const clickPercent = this.calculatePercent(width(), offsetX);
 
-    const time = (clickPercent * this._exactDuration()) / 100;
+    const time = (clickPercent * this.exactDuration()) / 100;
 
     void this.play(time);
   }
@@ -142,26 +117,28 @@ export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
   private startInterval() {
     interval(100)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        const audio = this.audioRef().nativeElement;
-        if (audio) {
-          const percent = this.calculatePercent(this._exactDuration(), audio.currentTime);
-          this._exactPlayedPercent.set(percent < 100 ? percent : 100);
-          this._exactCurrentTime.set(audio.currentTime);
+      .subscribe({
+        next: () => {
+          const audio = this.audioRef().nativeElement;
+          if (audio) {
+            const percent = this.calculatePercent(this.exactDuration(), audio.currentTime);
+            this.exactPlayedPercent.set(percent < 100 ? percent : 100);
+            this.exactCurrentTime.set(audio.currentTime);
 
-          this._isPause.set(audio.paused);
+            this.isPaused.set(audio.paused);
+          }
         }
       })
   }
 
   private fetchAudio(audioSrc: string) {
-    this._isLoading.set(true);
+    this.isLoading.set(true);
 
     this.httpClient
       .get(audioSrc, {responseType: 'arraybuffer'})
       .pipe(
         finalize(() => {
-          this._isLoading.set(false);
+          this.isLoading.set(false);
         }),
         takeUntilDestroyed(this.destroyRef)
       )
@@ -171,18 +148,18 @@ export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
             const audioContext = new AudioContext();
             const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-            this._exactDuration.set(audioBuffer.duration);
+            this.exactDuration.set(audioBuffer.duration);
 
             const filteredData = this.audioWaveService.filterData(audioBuffer);
-            this._normalizedData.set(this.audioWaveService.normalizeData(filteredData));
+            this.normalizedData.set(this.audioWaveService.normalizeData(filteredData));
           } catch (e) {
-            this._error.set(true)
+            this.hasError.set(true)
           }
         },
         error: (error) => {
           console.error(error);
 
-          this._error.set(true)
+          this.hasError.set(true)
         }
       });
   }
