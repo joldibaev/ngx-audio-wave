@@ -11,6 +11,7 @@ import {
   numberAttribute,
   OnDestroy,
   PLATFORM_ID,
+  SecurityContext,
   signal,
   viewChild
 } from '@angular/core';
@@ -19,6 +20,7 @@ import {isPlatformBrowser} from "@angular/common";
 import {finalize, interval} from "rxjs";
 import {NgxAudioWaveService} from "../service/ngx-audio-wave.service";
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 
 @Component({
   standalone: false,
@@ -28,7 +30,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
-  audioSrc = input.required<string>();
+  audioSrc = input.required<string | SafeUrl>();
 
   color = input('#1e90ff');
   height = input(25, {transform: numberAttribute});
@@ -50,6 +52,8 @@ export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
   // injecting
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isPlatformBrowser = isPlatformBrowser(this.platformId);
+
+  private readonly domSanitizer = inject(DomSanitizer);
   private readonly httpClient = inject(HttpClient);
   private readonly audioWaveService = inject(NgxAudioWaveService);
   private readonly destroyRef = inject(DestroyRef);
@@ -131,11 +135,18 @@ export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
       })
   }
 
-  private fetchAudio(audioSrc: string) {
+  private fetchAudio(audioSrc: string | SafeUrl) {
     this.isLoading.set(true);
 
+    const src = typeof audioSrc === 'object' ? this.domSanitizer.sanitize(SecurityContext.URL, audioSrc) : audioSrc;
+    if (!src) {
+      console.error('Invalid SafeUrl: could not sanitize');
+      this.hasError.set(true);
+      return;
+    }
+
     this.httpClient
-      .get(audioSrc, {responseType: 'arraybuffer'})
+      .get(src, {responseType: 'arraybuffer'})
       .pipe(
         finalize(() => {
           this.isLoading.set(false);

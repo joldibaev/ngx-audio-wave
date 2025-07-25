@@ -6,36 +6,45 @@
 
   <ngx-audio-wave
     #ngxAudioWave
-    audioSrc="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/shoptalk-clip.mp3"
+    [audioSrc]="audioSrcLink()"
   ></ngx-audio-wave>
 
   <div>duration: {{ ngxAudioWave.duration() }} ({{ ngxAudioWave.exactDuration() }})</div>
+</section>
+
+<section>
+  <b>SafeUrl</b>
+
+  <ngx-audio-wave
+    #ngxAudioWave
+    [audioSrc]="audioSrcLinkSafeUrl()"
+  ></ngx-audio-wave>
 </section>
 
 <!-- width -->
 <section>
   <b>Width</b>
   <div style="width: 200px">
-    <ngx-audio-wave audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
+    <ngx-audio-wave [audioSrc]="audioSrc()"></ngx-audio-wave>
   </div>
 </section>
 
 <!-- rounded -->
 <section>
   <b>Rounded</b>
-  <ngx-audio-wave [rounded]="false" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
+  <ngx-audio-wave [rounded]="false" [audioSrc]="audioSrc()"></ngx-audio-wave>
 </section>
 
 <!-- color -->
 <section>
   <b>Color</b>
-  <ngx-audio-wave color="#ee2133" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
+  <ngx-audio-wave color="#ee2133" [audioSrc]="audioSrc()"></ngx-audio-wave>
 </section>
 
 <!-- isLoading -->
 <section>
   <b>isLoading</b>
-  <ngx-audio-wave #audioRef audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
+  <ngx-audio-wave #audioRef [audioSrc]="audioSrc()"></ngx-audio-wave>
 
   @if (!audioRef.isLoading()) {
     <div>
@@ -55,7 +64,7 @@
 <!-- btn -->
 <section>
   <b>Custom btn</b>
-  <ngx-audio-wave #audioRef1 [hideBtn]="true" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
+  <ngx-audio-wave #audioRef1 [hideBtn]="true" [audioSrc]="audioSrc()"></ngx-audio-wave>
 
   <button (click)="audioRef1.play()">Play</button>
   <button (click)="audioRef1.pause()">Pause</button>
@@ -63,7 +72,7 @@
 
 <section>
   <b>Toggle btn (is pause: {{ audioRef2.isPaused() }})</b>
-  <ngx-audio-wave #audioRef2 [hideBtn]="true" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
+  <ngx-audio-wave #audioRef2 [hideBtn]="true" [audioSrc]="audioSrc()"></ngx-audio-wave>
 
   @if (audioRef2.isPaused()) {
     <button (click)="audioRef2.play()">Play</button>
@@ -81,17 +90,17 @@
 <!-- height -->
 <section>
   <b>Height</b>
-  <ngx-audio-wave [height]="50" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-  <ngx-audio-wave [height]="100" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-  <ngx-audio-wave [height]="10" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
+  <ngx-audio-wave [height]="50" [audioSrc]="audioSrc()"></ngx-audio-wave>
+  <ngx-audio-wave [height]="100" [audioSrc]="audioSrc()"></ngx-audio-wave>
+  <ngx-audio-wave [height]="10" [audioSrc]="audioSrc()"></ngx-audio-wave>
 </section>
 
 <!-- gap -->
 <section>
   <b>Gap</b>
-  <ngx-audio-wave [gap]="1" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-  <ngx-audio-wave [gap]="2" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-  <ngx-audio-wave [gap]="9" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
+  <ngx-audio-wave [gap]="1" [audioSrc]="audioSrc()"></ngx-audio-wave>
+  <ngx-audio-wave [gap]="2" [audioSrc]="audioSrc()"></ngx-audio-wave>
+  <ngx-audio-wave [gap]="9" [audioSrc]="audioSrc()"></ngx-audio-wave>
 </section>
 
 <!-- error will be displayed, cause 404 -->

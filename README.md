@@ -24,7 +24,7 @@ import {NgxAudioWaveModule} from "ngx-audio-wave";
 ## Usage
 
 ```ts
-audioSrc = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/shoptalk-clip.mp3';
+audioSrc = 'https://cdn.freesound.org/previews/219/219167_3162775-lq.ogg';
 ```
 
 ```html
@@ -34,7 +34,7 @@ audioSrc = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/shoptalk-clip.mp3';
 
   <ngx-audio-wave
     #ngxAudioWave
-    audioSrc="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/shoptalk-clip.mp3"
+    audioSrc="https://cdn.freesound.org/previews/219/219167_3162775-lq.ogg"
   ></ngx-audio-wave>
 
   <div>duration: {{ngxAudioWave.duration()}} ({{ngxAudioWave.exactDuration()}})</div>
