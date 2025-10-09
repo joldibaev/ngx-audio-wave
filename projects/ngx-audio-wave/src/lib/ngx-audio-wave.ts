@@ -39,6 +39,8 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   readonly gap = input(5, { transform: numberAttribute });
   readonly rounded = input(true, { transform: booleanAttribute });
   readonly hideBtn = input(false, { transform: booleanAttribute });
+  readonly skip = input(5, { transform: numberAttribute });
+  readonly volume = input(1, { transform: numberAttribute });
 
   // accessibility inputs
   readonly ariaLabel = input<string>('');
@@ -50,6 +52,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   readonly isPaused = signal(true);
   readonly isLoading = signal(true);
   readonly hasError = signal(false);
+  readonly currentVolume = signal(1);
   readonly progressText = computed(() => {
     const current = this.exactCurrentTime();
     const duration = this.exactDuration();
@@ -127,6 +130,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     if (this.isPlatformBrowser) {
       this.fetchAudio(this.audioSrc());
+      this.setVolume(this.volume());
 
       this.startInterval();
     }
@@ -160,6 +164,31 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     const audio = this.audioRef().nativeElement;
     audio.currentTime = 0;
     this.pause();
+  }
+
+  setVolume(volume: number) {
+    if (!this.isPlatformBrowser) return;
+
+    const audio = this.audioRef().nativeElement;
+    const clampedVolume = Math.max(0, Math.min(1, volume));
+    audio.volume = clampedVolume;
+    this.currentVolume.set(clampedVolume);
+  }
+
+  mute() {
+    this.setVolume(0);
+  }
+
+  unmute() {
+    this.setVolume(this.volume());
+  }
+
+  toggleMute() {
+    if (this.currentVolume() === 0) {
+      this.unmute();
+    } else {
+      this.mute();
+    }
   }
 
   setTime(mouseEvent: MouseEvent) {
@@ -257,13 +286,13 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
 
       case 'ArrowLeft':
         event.preventDefault();
-        const leftTime = Math.max(0, audio.currentTime - 5);
+        const leftTime = Math.max(0, audio.currentTime - this.skip());
         this.play(leftTime);
         break;
 
       case 'ArrowRight':
         event.preventDefault();
-        const rightTime = Math.min(duration, audio.currentTime + 5);
+        const rightTime = Math.min(duration, audio.currentTime + this.skip());
         this.play(rightTime);
         break;
 

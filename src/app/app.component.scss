@@ -116,3 +116,17 @@ kbd {
   padding: 2px 4px;
   white-space: nowrap;
 }
+
+.volume-info {
+  background-color: rgba(156, 39, 176, 0.1);
+  border: 1px solid rgba(156, 39, 176, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+
+  p {
+    margin: 0;
+    color: #7b1fa2;
+    font-weight: 500;
+  }
+}

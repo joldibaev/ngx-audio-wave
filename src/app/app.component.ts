@@ -1,12 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ToTimerPipe } from './pipes/to-timer.pipe';
 import { DomSanitizer } from '@angular/platform-browser';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, PercentPipe } from '@angular/common';
 import { NgxAudioWave } from 'ngx-audio-wave';
 
 @Component({
   selector: 'app-root',
-  imports: [ToTimerPipe, DecimalPipe, NgxAudioWave],
+  imports: [ToTimerPipe, DecimalPipe, PercentPipe, NgxAudioWave],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

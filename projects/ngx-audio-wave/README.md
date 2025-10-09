@@ -110,6 +110,22 @@ export class AppComponent {}
 <button (click)="audioPlayer.stop()">⏹️ Stop</button>
 ```
 
+### Volume Control
+
+```html
+<ngx-audio-wave #player audioSrc="assets/audio.mp3"></ngx-audio-wave>
+
+<div class="volume-controls">
+  <button (click)="player.mute()">🔇 Mute</button>
+  <button (click)="player.unmute()">🔊 Unmute</button>
+  <button (click)="player.toggleMute()">🔊/🔇 Toggle</button>
+  <button (click)="player.setVolume(0.5)">50% Volume</button>
+  <button (click)="player.setVolume(1)">100% Volume</button>
+</div>
+
+<p>Current volume: {{ player.currentVolume() | percent }}</p>
+```
+
 ### Different Heights and Gaps
 
 ```html
@@ -130,13 +146,13 @@ This component is built with accessibility as a core feature, ensuring it works 
 
 ### Keyboard Navigation
 
-| Key                | Action                  |
-| ------------------ | ----------------------- |
-| `Space` or `Enter` | Play/Pause audio        |
-| `Arrow Left`       | Skip backward 5 seconds |
-| `Arrow Right`      | Skip forward 5 seconds  |
-| `Home`             | Jump to beginning       |
-| `End`              | Jump to end             |
+| Key                | Action                                    |
+| ------------------ | ----------------------------------------- |
+| `Space` or `Enter` | Play/Pause audio                          |
+| `Arrow Left`       | Skip backward (configurable with `skip`)  |
+| `Arrow Right`      | Skip forward (configurable with `skip`)   |
+| `Home`             | Jump to beginning                         |
+| `End`              | Jump to end                               |
 
 ### Screen Reader Support
 
@@ -167,6 +183,8 @@ The component has been tested with:
 | `gap`              | `number`            | `5`                    | Gap between wave bars in pixels            |
 | `rounded`          | `boolean`           | `true`                 | Whether to round the corners of wave bars  |
 | `hideBtn`          | `boolean`           | `false`                | Hide the play/pause button                 |
+| `skip`             | `number`            | `5`                    | Seconds to skip when using arrow keys      |
+| `volume`           | `number`            | `1`                    | Initial volume level (0-1)                 |
 | `ariaLabel`        | `string`            | `'Audio player'`       | Main ARIA label for the component          |
 | `playButtonLabel`  | `string`            | `'Play audio'`         | ARIA label for the play button             |
 | `pauseButtonLabel` | `string`            | `'Pause audio'`        | ARIA label for the pause button            |
@@ -179,6 +197,7 @@ The component has been tested with:
 | `isPaused`           | `Signal<boolean>` | Whether the audio is currently paused                      |
 | `isLoading`          | `Signal<boolean>` | Whether the audio is currently loading                     |
 | `hasError`           | `Signal<boolean>` | Whether there was an error loading the audio               |
+| `currentVolume`      | `Signal<number>`  | Current volume level (0-1)                                 |
 | `exactCurrentTime`   | `Signal<number>`  | Current playback time in seconds (exact)                   |
 | `exactDuration`      | `Signal<number>`  | Total duration in seconds (exact)                          |
 | `exactPlayedPercent` | `Signal<number>`  | Playback progress as percentage (exact)                    |
@@ -195,6 +214,10 @@ The component has been tested with:
 | `play(time?: number)` | `time?: number` | Play the audio, optionally from a specific time |
 | `pause()`             | -               | Pause the audio                                 |
 | `stop()`              | -               | Stop the audio and reset to beginning           |
+| `setVolume(volume)`   | `volume: number`| Set volume level (0-1)                          |
+| `mute()`              | -               | Mute the audio                                  |
+| `unmute()`            | -               | Unmute the audio                                |
+| `toggleMute()`        | -               | Toggle mute state                               |
 
 ## Contributing
 

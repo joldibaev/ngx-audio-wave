@@ -135,6 +135,70 @@
   </div>
 </section>
 
+<!-- Volume Control -->
+<section>
+  <h3>Volume Control</h3>
+
+  <div>
+    <h4>Basic Volume Control</h4>
+    <ngx-audio-wave
+      #volumePlayer
+      [audioSrc]="audioSrc()"
+      [volume]="0.7"
+      ariaLabel="Volume control demo"
+    ></ngx-audio-wave>
+
+    <div class="volume-info">
+      <p>Current volume: {{ volumePlayer.currentVolume() | percent }}</p>
+    </div>
+
+    <div class="custom-controls">
+      <button class="control-btn" (click)="volumePlayer.mute()">🔇 Mute</button>
+      <button class="control-btn" (click)="volumePlayer.unmute()">🔊 Unmute</button>
+      <button class="control-btn" (click)="volumePlayer.toggleMute()">🔊/🔇 Toggle</button>
+    </div>
+  </div>
+
+  <div>
+    <h4>Volume Levels</h4>
+    <ngx-audio-wave
+      #volumeLevels
+      [audioSrc]="audioSrc()"
+      [hideBtn]="true"
+      ariaLabel="Volume levels demo"
+    ></ngx-audio-wave>
+
+    <div class="volume-info">
+      <p>Current volume: {{ volumeLevels.currentVolume() | percent }}</p>
+    </div>
+
+    <div class="custom-controls">
+      <button class="control-btn" (click)="volumeLevels.setVolume(0)">🔇 0%</button>
+      <button class="control-btn" (click)="volumeLevels.setVolume(0.25)">🔉 25%</button>
+      <button class="control-btn" (click)="volumeLevels.setVolume(0.5)">🔊 50%</button>
+      <button class="control-btn" (click)="volumeLevels.setVolume(0.75)">🔊 75%</button>
+      <button class="control-btn" (click)="volumeLevels.setVolume(1)">🔊 100%</button>
+    </div>
+  </div>
+
+  <div>
+    <h4>Initial Volume Settings</h4>
+    <p>Player with 30% initial volume:</p>
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [volume]="0.3"
+      ariaLabel="Low volume player"
+    ></ngx-audio-wave>
+
+    <p>Player with 80% initial volume:</p>
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [volume]="0.8"
+      ariaLabel="High volume player"
+    ></ngx-audio-wave>
+  </div>
+</section>
+
 <!-- Dimensions -->
 <section>
   <h3>Dimensions</h3>
