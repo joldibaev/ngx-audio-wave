@@ -1,14 +1,19 @@
 <section>
   <h3>Basic Usage</h3>
-  <div>Progress: {{ ngxAudioWave.exactPlayedPercent() | number:'1.1-1' }}%</div>
-  <div>Time: {{ ngxAudioWave.exactCurrentTime() | number:'1.1-1' }}s / {{ ngxAudioWave.exactDuration() | number:'1.1-1' }}s</div>
+  <div>
+    Progress: {{ ngxAudioWave.exactPlayedPercent() | number: '1.1-1' }}%
+  </div>
+  <div>
+    Time: {{ ngxAudioWave.exactCurrentTime() | number: '1.1-1' }}s /
+    {{ ngxAudioWave.exactDuration() | number: '1.1-1' }}s
+  </div>
   <div>Status: {{ ngxAudioWave.statusText() }}</div>
 
   <ngx-audio-wave
     #ngxAudioWave
     [audioSrc]="audioSrcLink()"
-    ariaLabel="Basic audio player demo">
-  </ngx-audio-wave>
+    ariaLabel="Basic audio player demo"
+  ></ngx-audio-wave>
 </section>
 
 <section>
@@ -18,45 +23,66 @@
   <ngx-audio-wave
     #ngxAudioWaveSafe
     [audioSrc]="audioSrcLinkSafeUrl()"
-    ariaLabel="Safe URL audio player">
-  </ngx-audio-wave>
+    ariaLabel="Safe URL audio player"
+  ></ngx-audio-wave>
 </section>
 
 <!-- Custom Styling -->
 <section>
   <h3>Custom Styling</h3>
-  
+
   <div>
     <h4>Width Constraint</h4>
-    <div style="width: 200px; border: 1px solid #ddd; padding: 10px;">
-      <ngx-audio-wave [audioSrc]="audioSrc()" ariaLabel="Width constrained player"></ngx-audio-wave>
+    <div style="width: 200px; border: 1px solid #ddd; padding: 10px">
+      <ngx-audio-wave
+        [audioSrc]="audioSrc()"
+        ariaLabel="Width constrained player"
+      ></ngx-audio-wave>
     </div>
   </div>
 
   <div>
     <h4>Rounded vs Square</h4>
     <p>Rounded (default):</p>
-    <ngx-audio-wave [audioSrc]="audioSrc()" ariaLabel="Rounded bars player"></ngx-audio-wave>
-    
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      ariaLabel="Rounded bars player"
+    ></ngx-audio-wave>
+
     <p>Square:</p>
-    <ngx-audio-wave [rounded]="false" [audioSrc]="audioSrc()" ariaLabel="Square bars player"></ngx-audio-wave>
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [rounded]="false"
+      ariaLabel="Square bars player"
+    ></ngx-audio-wave>
   </div>
 
   <div>
     <h4>Custom Color</h4>
-    <ngx-audio-wave color="#ee2133" [audioSrc]="audioSrc()" ariaLabel="Red colored player"></ngx-audio-wave>
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      ariaLabel="Red colored player"
+      color="#ee2133"
+    ></ngx-audio-wave>
   </div>
 </section>
 
 <!-- Loading States -->
 <section>
   <h3>Loading States</h3>
-  <ngx-audio-wave #audioRef [audioSrc]="audioSrc()" ariaLabel="Loading state demo"></ngx-audio-wave>
+  <ngx-audio-wave
+    #audioRef
+    [audioSrc]="audioSrc()"
+    ariaLabel="Loading state demo"
+  ></ngx-audio-wave>
 
   @if (!audioRef.isLoading()) {
     <div class="audio-info">
       <p>✅ Audio loaded successfully!</p>
-      <p>Duration: {{ audioRef.exactCurrentTime() | toTimer }} / {{ audioRef.exactDuration() | toTimer }}</p>
+      <p>
+        Duration: {{ audioRef.exactCurrentTime() | toTimer }} /
+        {{ audioRef.exactDuration() | toTimer }}
+      </p>
       <p>Status: {{ audioRef.statusText() }}</p>
     </div>
   } @else {
@@ -69,28 +95,42 @@
 <!-- Custom Controls -->
 <section>
   <h3>Custom Controls</h3>
-  
+
   <div>
     <h4>Hide Default Button</h4>
-    <ngx-audio-wave #audioRef1 [hideBtn]="true" [audioSrc]="audioSrc()" ariaLabel="Custom controls player"></ngx-audio-wave>
-    
+    <ngx-audio-wave
+      #audioRef1
+      [audioSrc]="audioSrc()"
+      [hideBtn]="true"
+      ariaLabel="Custom controls player"
+    ></ngx-audio-wave>
+
     <div class="custom-controls">
-      <button (click)="audioRef1.play()" class="control-btn">▶️ Play</button>
-      <button (click)="audioRef1.pause()" class="control-btn">⏸️ Pause</button>
+      <button class="control-btn" (click)="audioRef1.play()">▶️ Play</button>
+      <button class="control-btn" (click)="audioRef1.pause()">⏸️ Pause</button>
     </div>
   </div>
 
   <div>
-    <h4>Toggle Button (Status: {{ audioRef2.isPaused() ? 'Paused' : 'Playing' }})</h4>
-    <ngx-audio-wave #audioRef2 [hideBtn]="true" [audioSrc]="audioSrc()" ariaLabel="Toggle controls player"></ngx-audio-wave>
+    <h4>
+      Toggle Button (Status: {{ audioRef2.isPaused() ? 'Paused' : 'Playing' }})
+    </h4>
+    <ngx-audio-wave
+      #audioRef2
+      [audioSrc]="audioSrc()"
+      [hideBtn]="true"
+      ariaLabel="Toggle controls player"
+    ></ngx-audio-wave>
 
     <div class="custom-controls">
       @if (audioRef2.isPaused()) {
-        <button (click)="audioRef2.play()" class="control-btn">▶️ Play</button>
+        <button class="control-btn" (click)="audioRef2.play()">▶️ Play</button>
       } @else {
-        <button (click)="audioRef2.pause()" class="control-btn">⏸️ Pause</button>
+        <button class="control-btn" (click)="audioRef2.pause()">
+          ⏸️ Pause
+        </button>
       }
-      <button (click)="audioRef2.stop()" class="control-btn">⏹️ Stop</button>
+      <button class="control-btn" (click)="audioRef2.stop()">⏹️ Stop</button>
     </div>
   </div>
 </section>
@@ -98,56 +138,100 @@
 <!-- Dimensions -->
 <section>
   <h3>Dimensions</h3>
-  
+
   <div>
     <h4>Different Heights</h4>
     <p>Height: 25px (default)</p>
-    <ngx-audio-wave [audioSrc]="audioSrc()" ariaLabel="Default height player"></ngx-audio-wave>
-    
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      ariaLabel="Default height player"
+    ></ngx-audio-wave>
+
     <p>Height: 50px</p>
-    <ngx-audio-wave [height]="50" [audioSrc]="audioSrc()" ariaLabel="Medium height player"></ngx-audio-wave>
-    
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [height]="50"
+      ariaLabel="Medium height player"
+    ></ngx-audio-wave>
+
     <p>Height: 100px</p>
-    <ngx-audio-wave [height]="100" [audioSrc]="audioSrc()" ariaLabel="Tall height player"></ngx-audio-wave>
-    
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [height]="100"
+      ariaLabel="Tall height player"
+    ></ngx-audio-wave>
+
     <p>Height: 10px</p>
-    <ngx-audio-wave [height]="10" [audioSrc]="audioSrc()" ariaLabel="Short height player"></ngx-audio-wave>
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [height]="10"
+      ariaLabel="Short height player"
+    ></ngx-audio-wave>
   </div>
 
   <div>
     <h4>Different Gaps</h4>
     <p>Gap: 1px</p>
-    <ngx-audio-wave [gap]="1" [audioSrc]="audioSrc()" ariaLabel="Tight gap player"></ngx-audio-wave>
-    
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [gap]="1"
+      ariaLabel="Tight gap player"
+    ></ngx-audio-wave>
+
     <p>Gap: 5px (default)</p>
-    <ngx-audio-wave [audioSrc]="audioSrc()" ariaLabel="Default gap player"></ngx-audio-wave>
-    
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      ariaLabel="Default gap player"
+    ></ngx-audio-wave>
+
     <p>Gap: 10px</p>
-    <ngx-audio-wave [gap]="10" [audioSrc]="audioSrc()" ariaLabel="Wide gap player"></ngx-audio-wave>
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [gap]="10"
+      ariaLabel="Wide gap player"
+    ></ngx-audio-wave>
   </div>
 </section>
 
 <!-- Accessibility Features -->
 <section>
   <h3>Accessibility Features</h3>
-  <p>Try using keyboard navigation: Space/Enter to play/pause, Arrow keys to skip, Home/End to jump to beginning/end</p>
-  
-  <ngx-audio-wave 
+  <p>
+    Try using keyboard navigation: Space/Enter to play/pause, Arrow keys to
+    skip, Home/End to jump to beginning/end
+  </p>
+
+  <ngx-audio-wave
     #accessibilityDemo
     [audioSrc]="audioSrc()"
     ariaLabel="Accessibility demo audio player"
-    playButtonLabel="Play demo audio"
     pauseButtonLabel="Pause demo audio"
-    progressBarLabel="Audio progress - use arrow keys to navigate">
-  </ngx-audio-wave>
-  
+    playButtonLabel="Play demo audio"
+    progressBarLabel="Audio progress - use arrow keys to navigate"
+  ></ngx-audio-wave>
+
   <div class="keyboard-shortcuts">
     <h4>Keyboard Shortcuts:</h4>
     <ul>
-      <li><kbd>Space</kbd> or <kbd>Enter</kbd>: Play/Pause</li>
-      <li><kbd>←</kbd> <kbd>→</kbd>: Skip 5 seconds</li>
-      <li><kbd>Home</kbd>: Jump to beginning</li>
-      <li><kbd>End</kbd>: Jump to end</li>
+      <li>
+        <kbd>Space</kbd>
+        or
+        <kbd>Enter</kbd>
+        : Play/Pause
+      </li>
+      <li>
+        <kbd>←</kbd>
+        <kbd>→</kbd>
+        : Skip 5 seconds
+      </li>
+      <li>
+        <kbd>Home</kbd>
+        : Jump to beginning
+      </li>
+      <li>
+        <kbd>End</kbd>
+        : Jump to end
+      </li>
     </ul>
   </div>
 </section>
@@ -156,9 +240,8 @@
 <section>
   <h3>Error Handling</h3>
   <p>Example of error state when audio file is not found:</p>
-  <ngx-audio-wave 
-    audioSrc="no_file.mp3" 
-    ariaLabel="Error demo player">
-  </ngx-audio-wave>
+  <ngx-audio-wave
+    ariaLabel="Error demo player"
+    audioSrc="no_file.mp3"
+  ></ngx-audio-wave>
 </section>
-

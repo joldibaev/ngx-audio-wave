@@ -10,9 +10,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "ngx-audio-wave": [
-        "./dist/ngx-audio-wave"
-      ]
+      "ngx-audio-wave": ["./dist/ngx-audio-wave"]
     },
     "skipLibCheck": true,
     "isolatedModules": true,

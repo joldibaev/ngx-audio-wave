@@ -17,7 +17,7 @@
 
     &.real {
       rect {
-        opacity: .3;
+        opacity: 0.3;
       }
     }
 
@@ -36,7 +36,7 @@
     bottom: 0;
     width: 100%;
     height: 100%;
-    transition: clip-path .3s;
+    transition: clip-path 0.3s;
     pointer-events: none;
   }
 }
@@ -46,7 +46,7 @@
   //background: none;
   width: 2rem;
   height: 2rem;
-  background-color: rgba(0, 0, 0, .1);
+  background-color: rgba(0, 0, 0, 0.1);
   border-radius: 50%;
   padding: 0;
 
@@ -55,15 +55,15 @@
   justify-content: center;
   flex-shrink: 0;
 
-  transition: background-color .3s;
+  transition: background-color 0.3s;
   cursor: pointer;
 
   &:hover {
-    background-color: rgba(0, 0, 0, .15);
+    background-color: rgba(0, 0, 0, 0.15);
   }
 
   &:active {
-    background-color: rgba(0, 0, 0, .2);
+    background-color: rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -73,7 +73,7 @@
 
   height: 2rem;
   display: flex;
-  gap: .5rem;
+  gap: 0.5rem;
 
   span {
     display: block;
@@ -81,9 +81,9 @@
     width: 5px;
     background-color: var(--ngx-audio-wave-color);
     border-radius: 4px;
-    opacity: .1;
+    opacity: 0.1;
 
-    animation: ngx-audio-wave-loading-anim .75s infinite;
+    animation: ngx-audio-wave-loading-anim 0.75s infinite;
   }
 }
 

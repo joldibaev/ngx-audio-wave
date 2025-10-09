@@ -1,66 +1,91 @@
-<audio (pause)="pauseChange($event)"
-       (play)="pauseChange($event)"
-       #audioRef
-       [src]="audioSrc()"></audio>
+<audio
+  #audioRef
+  [src]="audioSrc()"
+  (pause)="pauseChange($event)"
+  (play)="pauseChange($event)"
+  hidden="hidden"
+></audio>
 
-<div [style.--ngx-audio-wave-color]="color()"
-     class="ngx-audio-wave-wrapper"
-     [attr.aria-label]="ariaLabel() || 'Audio player'"
-     role="region">
+<div
+  class="ngx-audio-wave-wrapper"
+  [attr.aria-label]="ariaLabel() || 'Audio player'"
+  [style.--ngx-audio-wave-color]="color()"
+  role="region"
+>
   @if (!hasError()) {
     @if (!hideBtn()) {
       @if (isPaused()) {
         <button
           class="ngx-audio-wave-btn"
-          (click)="play()"
           [attr.aria-label]="playButtonLabel()"
           [attr.aria-pressed]="false"
-          type="button">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          (click)="play()"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
-              d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+              d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"
+            />
           </svg>
         </button>
       } @else {
         <button
           class="ngx-audio-wave-btn"
-          (click)="pause()"
           [attr.aria-label]="pauseButtonLabel()"
           [attr.aria-pressed]="true"
-          type="button">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          (click)="pause()"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
-              d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+              d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"
+            />
           </svg>
         </button>
       }
     }
 
-    <div class="ngx-audio-wave"
-         [style.height.px]="height()"
-         [style.width.px]="width()"
-         role="progressbar"
-         [attr.aria-label]="progressBarLabel()"
-         [attr.aria-valuenow]="exactPlayedPercent()"
-         [attr.aria-valuemin]="0"
-         [attr.aria-valuemax]="100"
-         [attr.aria-valuetext]="progressText()"
-         tabindex="0"
-         (click)="setTime($event)"
-         (keydown)="onKeyDown($event)">
+    <div
+      class="ngx-audio-wave"
+      [attr.aria-label]="progressBarLabel()"
+      [attr.aria-valuemax]="100"
+      [attr.aria-valuemin]="0"
+      [attr.aria-valuenow]="exactPlayedPercent()"
+      [attr.aria-valuetext]="progressText()"
+      [style.height.px]="height()"
+      [style.width.px]="width()"
+      (click)="setTime($event)"
+      (keydown)="onKeyDown($event)"
+      role="progressbar"
+      tabindex="0"
+    >
       @if (!isLoading()) {
-        <svg [attr.viewBox]="`0 0 ${width()} ${height()}`"
-             class="real"
-             aria-hidden="true">
+        <svg
+          class="real"
+          [attr.viewBox]="`0 0 ${width()} ${height()}`"
+          aria-hidden="true"
+        >
           @for (rect of normalizedData(); track rect; let index = $index) {
             <rect
               [attr.height]="rect * height()"
+              [attr.rx]="rounded() ? 1 : 0"
+              [attr.ry]="rounded() ? 1 : 0"
               [attr.width]="2"
               [attr.x]="index * gap()"
-              [attr.y]="height() - (rect * height())"
-              [attr.rx]="rounded() ? 1 : 0"
-              [attr.ry]="rounded() ? 1 : 0">
-            </rect>
+              [attr.y]="height() - rect * height()"
+            ></rect>
           }
         </svg>
 
@@ -69,17 +94,21 @@
             @for (rect of normalizedData(); track rect; let index = $index) {
               <rect
                 [attr.height]="rect * height()"
+                [attr.rx]="rounded() ? 1 : 0"
+                [attr.ry]="rounded() ? 1 : 0"
                 [attr.width]="2"
                 [attr.x]="index * gap()"
-                [attr.y]="height() - (rect * height())"
-                [attr.rx]="rounded() ? 1 : 0"
-                [attr.ry]="rounded() ? 1 : 0">
-              </rect>
+                [attr.y]="height() - rect * height()"
+              ></rect>
             }
           </svg>
         </div>
       } @else {
-        <div class="ngx-audio-wave-loading" role="status" aria-label="Loading audio">
+        <div
+          class="ngx-audio-wave-loading"
+          aria-label="Loading audio"
+          role="status"
+        >
           <span></span>
           <span></span>
           <span></span>
@@ -88,11 +117,11 @@
     </div>
 
     <!-- Live region for screen readers -->
-    <div aria-live="polite" aria-atomic="true" class="ngx-audio-wave-sr-only">
+    <div class="ngx-audio-wave-sr-only" aria-atomic="true" aria-live="polite">
       {{ statusText() }}
     </div>
   } @else {
-    <div role="alert" aria-label="Audio loading error">
+    <div aria-label="Audio loading error" role="alert">
       Some errors occurred
     </div>
   }

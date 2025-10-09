@@ -1,0 +1,23 @@
+{
+  "semi": true,
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false,
+  "bracketSpacing": true,
+  "arrowParens": "avoid",
+  "endOfLine": "lf",
+  "plugins": ["prettier-plugin-organize-attributes"],
+  "attributeSort": "id,class,style,data-*,aria-*,role,type,name,value,placeholder,disabled,readonly,required,checked,selected,multiple,size,maxlength,minlength,pattern,title,alt,src,href,target,rel,onclick,onchange,oninput,onblur,onfocus,onmouseover,onmouseout,onkeydown,onkeyup,onkeypress,onload,onerror,on*",
+  "overrides": [
+    {
+      "files": "*.html",
+      "options": {
+        "parser": "angular",
+        "printWidth": 80,
+        "htmlWhitespaceSensitivity": "ignore"
+      }
+    }
+  ]
+}

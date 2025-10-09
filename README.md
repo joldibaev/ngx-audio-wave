@@ -34,11 +34,12 @@ import { NgxAudioWave } from 'ngx-audio-wave';
   standalone: true,
   imports: [NgxAudioWave],
   template: `
-    <ngx-audio-wave 
+    <ngx-audio-wave
+      ariaLabel="My audio player"
       audioSrc="path/to/your/audio.mp3"
-      ariaLabel="My audio player">
+    >
     </ngx-audio-wave>
-  `
+  `,
 })
 export class AppComponent {}
 ```
@@ -46,9 +47,10 @@ export class AppComponent {}
 ## Basic Usage
 
 ```html
-<ngx-audio-wave 
+<ngx-audio-wave
+  ariaLabel="My podcast episode"
   audioSrc="https://example.com/audio.mp3"
-  ariaLabel="My podcast episode">
+>
 </ngx-audio-wave>
 ```
 
@@ -59,7 +61,10 @@ export class AppComponent {}
 
 <div class="audio-info">
   <p>Progress: {{ player.exactPlayedPercent() | number:'1.1-1' }}%</p>
-  <p>Time: {{ player.exactCurrentTime() | number:'1.1-1' }}s / {{ player.exactDuration() | number:'1.1-1' }}s</p>
+  <p>
+    Time: {{ player.exactCurrentTime() | number:'1.1-1' }}s / {{
+    player.exactDuration() | number:'1.1-1' }}s
+  </p>
   <p>Status: {{ player.statusText() }}</p>
 </div>
 ```
@@ -71,34 +76,33 @@ export class AppComponent {}
 ### Custom Styling
 
 ```html
-<ngx-audio-wave 
+<ngx-audio-wave
+  [gap]="3"
+  [height]="50"
+  [rounded]="false"
   audioSrc="assets/audio.mp3"
   color="#ff6b6b"
-  [height]="50"
-  [gap]="3"
-  [rounded]="false">
+>
 </ngx-audio-wave>
 ```
 
 ### With Custom Accessibility Labels
 
 ```html
-<ngx-audio-wave 
-  audioSrc="assets/podcast.mp3"
+<ngx-audio-wave
   ariaLabel="Weekly Tech Podcast Episode 42"
-  playButtonLabel="Start podcast"
+  audioSrc="assets/podcast.mp3"
   pauseButtonLabel="Pause podcast"
-  progressBarLabel="Podcast progress - use arrow keys to navigate">
+  playButtonLabel="Start podcast"
+  progressBarLabel="Podcast progress - use arrow keys to navigate"
+>
 </ngx-audio-wave>
 ```
 
 ### Hide Default Button
 
 ```html
-<ngx-audio-wave 
-  #audioPlayer
-  [hideBtn]="true"
-  audioSrc="assets/audio.mp3">
+<ngx-audio-wave [hideBtn]="true" #audioPlayer audioSrc="assets/audio.mp3">
 </ngx-audio-wave>
 
 <button (click)="audioPlayer.play()">▶️ Play</button>
@@ -126,13 +130,13 @@ This component is built with accessibility as a core feature, ensuring it works 
 
 ### Keyboard Navigation
 
-| Key | Action |
-|-----|--------|
-| `Space` or `Enter` | Play/Pause audio |
-| `Arrow Left` | Skip backward 5 seconds |
-| `Arrow Right` | Skip forward 5 seconds |
-| `Home` | Jump to beginning |
-| `End` | Jump to end |
+| Key                | Action                  |
+| ------------------ | ----------------------- |
+| `Space` or `Enter` | Play/Pause audio        |
+| `Arrow Left`       | Skip backward 5 seconds |
+| `Arrow Right`      | Skip forward 5 seconds  |
+| `Home`             | Jump to beginning       |
+| `End`              | Jump to end             |
 
 ### Screen Reader Support
 
@@ -145,6 +149,7 @@ This component is built with accessibility as a core feature, ensuring it works 
 ### Testing with Screen Readers
 
 The component has been tested with:
+
 - **NVDA** (Windows)
 - **JAWS** (Windows)
 - **VoiceOver** (macOS/iOS)
@@ -154,43 +159,42 @@ The component has been tested with:
 
 ### Input Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `audioSrc` | `string \| SafeUrl` | **Required** | URL or SafeUrl of the audio file to play |
-| `color` | `string` | `'#1e90ff'` | Color of the audio wave bars |
-| `height` | `number` | `25` | Height of the wave visualization in pixels |
-| `gap` | `number` | `5` | Gap between wave bars in pixels |
-| `rounded` | `boolean` | `true` | Whether to round the corners of wave bars |
-| `hideBtn` | `boolean` | `false` | Hide the play/pause button |
-| `ariaLabel` | `string` | `'Audio player'` | Main ARIA label for the component |
-| `playButtonLabel` | `string` | `'Play audio'` | ARIA label for the play button |
-| `pauseButtonLabel` | `string` | `'Pause audio'` | ARIA label for the pause button |
-| `progressBarLabel` | `string` | `'Audio progress bar'` | ARIA label for the progress bar |
+| Property           | Type                | Default                | Description                                |
+| ------------------ | ------------------- | ---------------------- | ------------------------------------------ |
+| `audioSrc`         | `string \| SafeUrl` | **Required**           | URL or SafeUrl of the audio file to play   |
+| `color`            | `string`            | `'#1e90ff'`            | Color of the audio wave bars               |
+| `height`           | `number`            | `25`                   | Height of the wave visualization in pixels |
+| `gap`              | `number`            | `5`                    | Gap between wave bars in pixels            |
+| `rounded`          | `boolean`           | `true`                 | Whether to round the corners of wave bars  |
+| `hideBtn`          | `boolean`           | `false`                | Hide the play/pause button                 |
+| `ariaLabel`        | `string`            | `'Audio player'`       | Main ARIA label for the component          |
+| `playButtonLabel`  | `string`            | `'Play audio'`         | ARIA label for the play button             |
+| `pauseButtonLabel` | `string`            | `'Pause audio'`        | ARIA label for the pause button            |
+| `progressBarLabel` | `string`            | `'Audio progress bar'` | ARIA label for the progress bar            |
 
 ### Output Properties (Signals)
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `isPaused` | `Signal<boolean>` | Whether the audio is currently paused |
-| `isLoading` | `Signal<boolean>` | Whether the audio is currently loading |
-| `hasError` | `Signal<boolean>` | Whether there was an error loading the audio |
-| `exactCurrentTime` | `Signal<number>` | Current playback time in seconds (exact) |
-| `exactDuration` | `Signal<number>` | Total duration in seconds (exact) |
-| `exactPlayedPercent` | `Signal<number>` | Playback progress as percentage (exact) |
-| `currentTime` | `Signal<number>` | **Deprecated** - Current playback time rounded to seconds |
-| `duration` | `Signal<number>` | **Deprecated** - Total duration rounded to seconds |
-| `playedPercent` | `Signal<number>` | **Deprecated** - Playback progress as percentage (rounded) |
-| `progressText` | `Signal<string>` | Human-readable progress text for screen readers |
-| `statusText` | `Signal<string>` | Current status text for screen readers |
+| Property             | Type              | Description                                                |
+| -------------------- | ----------------- | ---------------------------------------------------------- |
+| `isPaused`           | `Signal<boolean>` | Whether the audio is currently paused                      |
+| `isLoading`          | `Signal<boolean>` | Whether the audio is currently loading                     |
+| `hasError`           | `Signal<boolean>` | Whether there was an error loading the audio               |
+| `exactCurrentTime`   | `Signal<number>`  | Current playback time in seconds (exact)                   |
+| `exactDuration`      | `Signal<number>`  | Total duration in seconds (exact)                          |
+| `exactPlayedPercent` | `Signal<number>`  | Playback progress as percentage (exact)                    |
+| `currentTime`        | `Signal<number>`  | **Deprecated** - Current playback time rounded to seconds  |
+| `duration`           | `Signal<number>`  | **Deprecated** - Total duration rounded to seconds         |
+| `playedPercent`      | `Signal<number>`  | **Deprecated** - Playback progress as percentage (rounded) |
+| `progressText`       | `Signal<string>`  | Human-readable progress text for screen readers            |
+| `statusText`         | `Signal<string>`  | Current status text for screen readers                     |
 
 ### Methods
 
-| Method | Parameters | Description |
-|--------|------------|-------------|
+| Method                | Parameters      | Description                                     |
+| --------------------- | --------------- | ----------------------------------------------- |
 | `play(time?: number)` | `time?: number` | Play the audio, optionally from a specific time |
-| `pause()` | - | Pause the audio |
-| `stop()` | - | Stop the audio and reset to beginning |
-
+| `pause()`             | -               | Pause the audio                                 |
+| `stop()`              | -               | Stop the audio and reset to beginning           |
 
 ## Contributing
 

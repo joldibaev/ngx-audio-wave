@@ -13,21 +13,21 @@ import {
   PLATFORM_ID,
   SecurityContext,
   signal,
-  viewChild
+  viewChild,
 } from '@angular/core';
-import {HttpClient} from "@angular/common/http";
-import {isPlatformBrowser} from "@angular/common";
-import {finalize, interval} from "rxjs";
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {NgxAudioWaveService} from './service/ngx-audio-wave.service';
+import { HttpClient } from '@angular/common/http';
+import { isPlatformBrowser } from '@angular/common';
+import { finalize, interval } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { NgxAudioWaveService } from './service/ngx-audio-wave.service';
 
 @Component({
   selector: 'ngx-audio-wave',
   templateUrl: './ngx-audio-wave.html',
   styleUrls: ['./ngx-audio-wave.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [NgxAudioWaveService]
+  providers: [NgxAudioWaveService],
 })
 export class NgxAudioWave implements AfterViewInit, OnDestroy {
   // input-required
@@ -35,10 +35,10 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
 
   // input-optional
   readonly color = input('#1e90ff');
-  readonly height = input(25, {transform: numberAttribute});
-  readonly gap = input(5, {transform: numberAttribute})
-  readonly rounded = input(true, {transform: booleanAttribute});
-  readonly hideBtn = input(false, {transform: booleanAttribute});
+  readonly height = input(25, { transform: numberAttribute });
+  readonly gap = input(5, { transform: numberAttribute });
+  readonly rounded = input(true, { transform: booleanAttribute });
+  readonly hideBtn = input(false, { transform: booleanAttribute });
 
   // accessibility inputs
   readonly ariaLabel = input<string>('');
@@ -84,24 +84,33 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
 
   // public-exact
   readonly exactPlayedPercent = computed(() => {
-    const percent = this.calculatePercent(this.exactDuration(), this.exactCurrentTime());
-    return (percent < 100 ? percent : 100);
+    const percent = this.calculatePercent(
+      this.exactDuration(),
+      this.exactCurrentTime()
+    );
+    return percent < 100 ? percent : 100;
   });
   readonly exactCurrentTime = signal(0);
   readonly exactDuration = signal(0);
 
   // public-rounded
   /** @deprecated This property will be removed in version 21.0.0. Use exactPlayedPercent instead. */
-  readonly playedPercent = computed(() => Math.round(this.exactPlayedPercent()))
+  readonly playedPercent = computed(() =>
+    Math.round(this.exactPlayedPercent())
+  );
   /** @deprecated This property will be removed in version 21.0.0. Use exactCurrentTime instead. */
-  readonly currentTime = computed(() => Math.round(this.exactCurrentTime()))
+  readonly currentTime = computed(() => Math.round(this.exactCurrentTime()));
   /** @deprecated This property will be removed in version 21.0.0. Use exactDuration instead. */
   readonly duration = computed(() => Math.round(this.exactDuration()));
 
   // component-dev
   protected readonly normalizedData = signal<number[]>([]);
-  protected readonly clipPath = computed(() => `inset(0px ${100 - this.exactPlayedPercent()}% 0px 0px)`)
-  protected readonly width = computed(() => this.audioWaveService.samples * this.gap());
+  protected readonly clipPath = computed(
+    () => `inset(0px ${100 - this.exactPlayedPercent()}% 0px 0px)`
+  );
+  protected readonly width = computed(
+    () => this.audioWaveService.samples * this.gap()
+  );
 
   // injecting
   private readonly platformId = inject(PLATFORM_ID);
@@ -112,7 +121,8 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
 
   // view
-  private audioRef = viewChild.required<ElementRef<HTMLAudioElement>>('audioRef');
+  private audioRef =
+    viewChild.required<ElementRef<HTMLAudioElement>>('audioRef');
 
   ngAfterViewInit() {
     if (this.isPlatformBrowser) {
@@ -152,10 +162,6 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     this.pause();
   }
 
-  private calculatePercent(total: number, value: number) {
-    return (value / total) * 100 || 0;
-  }
-
   setTime(mouseEvent: MouseEvent) {
     const offsetX = mouseEvent.offsetX;
     const width = this.width;
@@ -167,6 +173,10 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     void this.play(time);
   }
 
+  private calculatePercent(total: number, value: number) {
+    return (value / total) * 100 || 0;
+  }
+
   private startInterval() {
     interval(100)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -174,14 +184,17 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
         next: () => {
           const audio = this.audioRef().nativeElement;
           this.exactCurrentTime.set(audio.currentTime);
-        }
-      })
+        },
+      });
   }
 
   private fetchAudio(audioSrc: string | SafeUrl) {
     this.isLoading.set(true);
 
-    const src = typeof audioSrc === 'object' ? this.domSanitizer.sanitize(SecurityContext.URL, audioSrc) : audioSrc;
+    const src =
+      typeof audioSrc === 'object'
+        ? this.domSanitizer.sanitize(SecurityContext.URL, audioSrc)
+        : audioSrc;
     if (!src) {
       console.error('Invalid SafeUrl: could not sanitize');
       this.hasError.set(true);
@@ -189,7 +202,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     }
 
     this.httpClient
-      .get(src, {responseType: 'arraybuffer'})
+      .get(src, { responseType: 'arraybuffer' })
       .pipe(
         finalize(() => {
           this.isLoading.set(false);
@@ -197,7 +210,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: async (arrayBuffer) => {
+        next: async arrayBuffer => {
           try {
             const audioContext = new AudioContext();
             const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -205,25 +218,27 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
             this.exactDuration.set(audioBuffer.duration);
 
             const filteredData = this.audioWaveService.filterData(audioBuffer);
-            this.normalizedData.set(this.audioWaveService.normalizeData(filteredData));
+            this.normalizedData.set(
+              this.audioWaveService.normalizeData(filteredData)
+            );
           } catch (e) {
-            this.hasError.set(true)
+            this.hasError.set(true);
           }
         },
-        error: (error) => {
+        error: error => {
           console.error(error);
 
-          this.hasError.set(true)
-        }
+          this.hasError.set(true);
+        },
       });
   }
 
-  pauseChange(event: Event) {
+  protected pauseChange(event: Event) {
     if (!(event.target instanceof HTMLAudioElement)) return;
     this.isPaused.set(event.target.paused);
   }
 
-  onKeyDown(event: KeyboardEvent) {
+  protected onKeyDown(event: KeyboardEvent) {
     if (!this.isPlatformBrowser) return;
 
     const audio = this.audioRef().nativeElement;
