@@ -199,6 +199,71 @@
   </div>
 </section>
 
+<!-- Playback Speed Control -->
+<section>
+  <h3>Playback Speed Control</h3>
+
+  <div>
+    <h4>Basic Speed Control</h4>
+    <ngx-audio-wave
+      #speedPlayer
+      [audioSrc]="audioSrc()"
+      [playbackRate]="1.2"
+      ariaLabel="Speed control demo"
+    ></ngx-audio-wave>
+
+    <div class="speed-info">
+      <p>Current speed: {{ speedPlayer.currentPlaybackRate() }}x</p>
+    </div>
+
+    <div class="custom-controls">
+      <button class="control-btn" (click)="speedPlayer.decreasePlaybackRate()">⏪ Slower</button>
+      <button class="control-btn" (click)="speedPlayer.resetPlaybackRate()">1x Normal</button>
+      <button class="control-btn" (click)="speedPlayer.increasePlaybackRate()">⏩ Faster</button>
+    </div>
+  </div>
+
+  <div>
+    <h4>Speed Levels</h4>
+    <ngx-audio-wave
+      #speedLevels
+      [audioSrc]="audioSrc()"
+      [hideBtn]="true"
+      ariaLabel="Speed levels demo"
+    ></ngx-audio-wave>
+
+    <div class="speed-info">
+      <p>Current speed: {{ speedLevels.currentPlaybackRate() }}x</p>
+    </div>
+
+    <div class="custom-controls">
+      <button class="control-btn" (click)="speedLevels.setPlaybackRate(0.5)">🐌 0.5x</button>
+      <button class="control-btn" (click)="speedLevels.setPlaybackRate(0.75)">🚶 0.75x</button>
+      <button class="control-btn" (click)="speedLevels.setPlaybackRate(1)">🚶 1x</button>
+      <button class="control-btn" (click)="speedLevels.setPlaybackRate(1.25)">🏃 1.25x</button>
+      <button class="control-btn" (click)="speedLevels.setPlaybackRate(1.5)">🏃 1.5x</button>
+      <button class="control-btn" (click)="speedLevels.setPlaybackRate(2)">🏃‍♂️ 2x</button>
+    </div>
+  </div>
+
+  <div>
+    <h4>Initial Speed Settings</h4>
+    <p>Player with 0.75x initial speed (for slow speech):</p>
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [playbackRate]="0.75"
+      ariaLabel="Slow speed player"
+    ></ngx-audio-wave>
+
+    <p>Player with 1.5x initial speed (for fast content):</p>
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [playbackRate]="1.5"
+      ariaLabel="Fast speed player"
+    ></ngx-audio-wave>
+  </div>
+</section>
+
 <!-- Dimensions -->
 <section>
   <h3>Dimensions</h3>

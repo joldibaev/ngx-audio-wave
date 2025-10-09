@@ -126,6 +126,23 @@ export class AppComponent {}
 <p>Current volume: {{ player.currentVolume() | percent }}</p>
 ```
 
+### Playback Speed Control
+
+```html
+<ngx-audio-wave #player audioSrc="assets/audio.mp3"></ngx-audio-wave>
+
+<div class="speed-controls">
+  <button (click)="player.decreasePlaybackRate()">⏪ Slower</button>
+  <button (click)="player.resetPlaybackRate()">1x Normal</button>
+  <button (click)="player.increasePlaybackRate()">⏩ Faster</button>
+  <button (click)="player.setPlaybackRate(0.5)">0.5x</button>
+  <button (click)="player.setPlaybackRate(1.5)">1.5x</button>
+  <button (click)="player.setPlaybackRate(2)">2x</button>
+</div>
+
+<p>Current speed: {{ player.currentPlaybackRate() }}x</p>
+```
+
 ### Different Heights and Gaps
 
 ```html
@@ -185,6 +202,7 @@ The component has been tested with:
 | `hideBtn`          | `boolean`           | `false`                | Hide the play/pause button                 |
 | `skip`             | `number`            | `5`                    | Seconds to skip when using arrow keys      |
 | `volume`           | `number`            | `1`                    | Initial volume level (0-1)                 |
+| `playbackRate`     | `number`            | `1`                    | Initial playback speed (0.25-4)            |
 | `ariaLabel`        | `string`            | `'Audio player'`       | Main ARIA label for the component          |
 | `playButtonLabel`  | `string`            | `'Play audio'`         | ARIA label for the play button             |
 | `pauseButtonLabel` | `string`            | `'Pause audio'`        | ARIA label for the pause button            |
@@ -198,6 +216,7 @@ The component has been tested with:
 | `isLoading`          | `Signal<boolean>` | Whether the audio is currently loading                     |
 | `hasError`           | `Signal<boolean>` | Whether there was an error loading the audio               |
 | `currentVolume`      | `Signal<number>`  | Current volume level (0-1)                                 |
+| `currentPlaybackRate`| `Signal<number>`  | Current playback speed (0.25-4)                            |
 | `exactCurrentTime`   | `Signal<number>`  | Current playback time in seconds (exact)                   |
 | `exactDuration`      | `Signal<number>`  | Total duration in seconds (exact)                          |
 | `exactPlayedPercent` | `Signal<number>`  | Playback progress as percentage (exact)                    |
@@ -218,6 +237,10 @@ The component has been tested with:
 | `mute()`              | -               | Mute the audio                                  |
 | `unmute()`            | -               | Unmute the audio                                |
 | `toggleMute()`        | -               | Toggle mute state                               |
+| `setPlaybackRate(rate)`| `rate: number` | Set playback speed (0.25-4)                     |
+| `resetPlaybackRate()` | -               | Reset playback speed to 1x                      |
+| `increasePlaybackRate()`| -             | Increase playback speed by 0.25x                |
+| `decreasePlaybackRate()`| -             | Decrease playback speed by 0.25x                |
 
 ## Contributing
 

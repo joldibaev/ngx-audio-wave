@@ -41,6 +41,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   readonly hideBtn = input(false, { transform: booleanAttribute });
   readonly skip = input(5, { transform: numberAttribute });
   readonly volume = input(1, { transform: numberAttribute });
+  readonly playbackRate = input(1, { transform: numberAttribute });
 
   // accessibility inputs
   readonly ariaLabel = input<string>('');
@@ -53,6 +54,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   readonly isLoading = signal(true);
   readonly hasError = signal(false);
   readonly currentVolume = signal(1);
+  readonly currentPlaybackRate = signal(1);
   readonly progressText = computed(() => {
     const current = this.exactCurrentTime();
     const duration = this.exactDuration();
@@ -131,6 +133,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     if (this.isPlatformBrowser) {
       this.fetchAudio(this.audioSrc());
       this.setVolume(this.volume());
+      this.setPlaybackRate(this.playbackRate());
 
       this.startInterval();
     }
@@ -189,6 +192,31 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     } else {
       this.mute();
     }
+  }
+
+  setPlaybackRate(rate: number) {
+    if (!this.isPlatformBrowser) return;
+
+    const audio = this.audioRef().nativeElement;
+    const clampedRate = Math.max(0.25, Math.min(4, rate)); // Ограничиваем от 0.25x до 4x
+    audio.playbackRate = clampedRate;
+    this.currentPlaybackRate.set(clampedRate);
+  }
+
+  resetPlaybackRate() {
+    this.setPlaybackRate(1);
+  }
+
+  increasePlaybackRate() {
+    const currentRate = this.currentPlaybackRate();
+    const newRate = Math.min(4, currentRate + 0.25);
+    this.setPlaybackRate(newRate);
+  }
+
+  decreasePlaybackRate() {
+    const currentRate = this.currentPlaybackRate();
+    const newRate = Math.max(0.25, currentRate - 0.25);
+    this.setPlaybackRate(newRate);
   }
 
   setTime(mouseEvent: MouseEvent) {
