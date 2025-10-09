@@ -1,17 +1,16 @@
 import {Component, computed, inject, signal} from '@angular/core';
 import {ToTimerPipe} from './pipes/to-timer.pipe';
-import {NgxAudioWaveModule} from '../../projects/ngx-audio-wave/src/lib/ngx-audio-wave.module';
 import {DomSanitizer} from '@angular/platform-browser';
+import {DecimalPipe} from '@angular/common';
+import {NgxAudioWave} from 'ngx-audio-wave';
 
 @Component({
   selector: 'app-root',
-  imports: [NgxAudioWaveModule, ToTimerPipe],
+  imports: [ToTimerPipe, DecimalPipe, NgxAudioWave],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  audioText = '<audio>';
-
   private domSanitizer = inject(DomSanitizer)
 
   audioSrcLink = signal('https://cdn.freesound.org/previews/219/219167_3162775-lq.ogg');

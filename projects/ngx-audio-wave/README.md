@@ -1,115 +1,211 @@
-# Audio Wave for Angular 13+
+# ngx-audio-wave
 
-Very simple audio wave system
+A modern, accessible audio wave visualization component for Angular 20+ with comprehensive keyboard navigation and screen reader support.
 
-## Screen
-![alt text](https://github.com/joldibaev/silicon-audio-wave/raw/master/public/demo2.png)
+## Features
 
-## Installation
+- 🎵 **Audio Wave Visualization** - Beautiful SVG-based audio wave display
+- ⌨️ **Full Keyboard Support** - Complete keyboard navigation (Space, Enter, Arrow keys, Home, End)
+- ♿ **Accessibility First** - WCAG 2.1 compliant with ARIA support
+- 🎨 **Highly Customizable** - Colors, dimensions, gaps, and styling options
+- 📱 **Responsive Design** - Works on all screen sizes
+- 🚀 **Modern Angular** - Built with Angular 20+ signals and standalone components
+- 🎯 **TypeScript** - Full type safety and IntelliSense support
 
-Install the npm package.
+## Demo
 
-	npm i ngx-audio-wave --save
+![Audio Wave Demo](https://github.com/joldibaev/ngx-audio-wave/raw/master/public/demo3.png)
 
-Import module:
+## Quick Start
+
+### Installation
+
+```bash
+npm install ngx-audio-wave
+```
+
+### Angular 20+ (Standalone Components)
 
 ```ts
-import {NgxAudioWaveModule} from "ngx-audio-wave";
+import { NgxAudioWave } from 'ngx-audio-wave';
 
-@NgModule({
-  imports: [NgxAudioWaveModule]
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [NgxAudioWave],
+  template: `
+    <ngx-audio-wave 
+      audioSrc="path/to/your/audio.mp3"
+      ariaLabel="My audio player">
+    </ngx-audio-wave>
+  `
 })
+export class AppComponent {}
 ```
 
-## Usage
-
-```ts
-audioSrc = 'https://cdn.freesound.org/previews/219/219167_3162775-lq.ogg';
-```
+## Basic Usage
 
 ```html
-<section>
-  <div>played percent: {{ngxAudioWave.playedPercent()}} ({{ngxAudioWave.exactPlayedPercent()}})</div>
-  <div>current time: {{ngxAudioWave.currentTime()}} ({{ngxAudioWave.exactCurrentTime()}})</div>
-
-  <ngx-audio-wave
-    #ngxAudioWave
-    audioSrc="https://cdn.freesound.org/previews/219/219167_3162775-lq.ogg"
-  ></ngx-audio-wave>
-
-  <div>duration: {{ngxAudioWave.duration()}} ({{ngxAudioWave.exactDuration()}})</div>
-</section>
+<ngx-audio-wave 
+  audioSrc="https://example.com/audio.mp3"
+  ariaLabel="My podcast episode">
+</ngx-audio-wave>
 ```
 
-## Properties
+### With Progress Information
 
 ```html
-<!-- rounded -->
-<ngx-audio-wave [rounded]="false" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
+<ngx-audio-wave #player audioSrc="assets/audio.mp3"></ngx-audio-wave>
 
-<!-- color -->
-<ngx-audio-wave color="#ee2133" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-
-<!-- isLoading -->
-<section>
-  <ngx-audio-wave #audioRef color="#ee2133" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-  @if(!audioRef.isLoading()){
-    <div>duration: {{ngxAudioWave.duration() | toTimer}} (no duration while loading)</div>
-  }
-  <div>duration: {{ngxAudioWave.duration() | toTimer}} (zero will be display while loading)</div>
-</section>
-
-<!-- height -->
-<ngx-audio-wave [height]="50" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-<ngx-audio-wave [height]="100" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-<ngx-audio-wave [height]="10" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-
-<!-- gap -->
-<ngx-audio-wave [gap]="1" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-<ngx-audio-wave [gap]="2" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-<ngx-audio-wave [gap]="9" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-
-<!-- error will be displayed, cause 404 -->
-<ngx-audio-wave audioSrc="assets/no_file.mp3"></ngx-audio-wave>
+<div class="audio-info">
+  <p>Progress: {{ player.exactPlayedPercent() | number:'1.1-1' }}%</p>
+  <p>Time: {{ player.exactCurrentTime() | number:'1.1-1' }}s / {{ player.exactDuration() | number:'1.1-1' }}s</p>
+  <p>Status: {{ player.statusText() }}</p>
+</div>
 ```
 
-## Custom btn
+> **Note:** Use `exact*` properties instead of deprecated `currentTime`, `duration`, and `playedPercent` for better precision.
 
-### One action btn
+## Examples
+
+### Custom Styling
 
 ```html
-<ngx-audio-wave #audioRef1 [hideBtn]="true" audioSrc="assets/voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-<button (click)="audioRef1.play()">Play</button>
-<button (click)="audioRef1.pause()">Pause</button>
+<ngx-audio-wave 
+  audioSrc="assets/audio.mp3"
+  color="#ff6b6b"
+  [height]="50"
+  [gap]="3"
+  [rounded]="false">
+</ngx-audio-wave>
 ```
 
-### Toggle btn
+### With Custom Accessibility Labels
+
 ```html
-  <b>Toggle btn (is pause: {{ audioRef2.isPaused() }})</b>
-<ngx-audio-wave #audioRef2 [hideBtn]="true" audioSrc="voice_29-06-2022_23-30-15.ogg"></ngx-audio-wave>
-
-@if (audioRef2.isPaused()) {
-<button (click)="audioRef2.play()">Play</button>
-} @else {
-<button (click)="audioRef2.pause()">Pause</button>
-}
-<button (click)="audioRef2.stop()">Stop</button>
+<ngx-audio-wave 
+  audioSrc="assets/podcast.mp3"
+  ariaLabel="Weekly Tech Podcast Episode 42"
+  playButtonLabel="Start podcast"
+  pauseButtonLabel="Pause podcast"
+  progressBarLabel="Podcast progress - use arrow keys to navigate">
+</ngx-audio-wave>
 ```
 
-or you can get access to The HTML ```<audio>``` element inside component
-```audioRef2.audio?.nativeElement```
+### Hide Default Button
 
-Example:
 ```html
-@if(audioRef2.audio?.nativeElement?.paused) {
-    <button (click)="audioRef1.play()">Play</button>
-} @else {
-    <button (click)="audioRef1.pause()">Pause</button>
-}
+<ngx-audio-wave 
+  #audioPlayer
+  [hideBtn]="true"
+  audioSrc="assets/audio.mp3">
+</ngx-audio-wave>
+
+<button (click)="audioPlayer.play()">▶️ Play</button>
+<button (click)="audioPlayer.pause()">⏸️ Pause</button>
+<button (click)="audioPlayer.stop()">⏹️ Stop</button>
 ```
-#### WARNING: using this code will lead to [NG0100: ExpressionChangedAfterItHasBeenCheckedError]
+
+### Different Heights and Gaps
+
+```html
+<!-- Different heights -->
+<ngx-audio-wave [height]="25" audioSrc="assets/audio.mp3"></ngx-audio-wave>
+<ngx-audio-wave [height]="50" audioSrc="assets/audio.mp3"></ngx-audio-wave>
+<ngx-audio-wave [height]="100" audioSrc="assets/audio.mp3"></ngx-audio-wave>
+
+<!-- Different gaps -->
+<ngx-audio-wave [gap]="1" audioSrc="assets/audio.mp3"></ngx-audio-wave>
+<ngx-audio-wave [gap]="5" audioSrc="assets/audio.mp3"></ngx-audio-wave>
+<ngx-audio-wave [gap]="10" audioSrc="assets/audio.mp3"></ngx-audio-wave>
+```
+
+## Accessibility Features
+
+This component is built with accessibility as a core feature, ensuring it works seamlessly with assistive technologies and keyboard navigation.
+
+### Keyboard Navigation
+
+| Key | Action |
+|-----|--------|
+| `Space` or `Enter` | Play/Pause audio |
+| `Arrow Left` | Skip backward 5 seconds |
+| `Arrow Right` | Skip forward 5 seconds |
+| `Home` | Jump to beginning |
+| `End` | Jump to end |
+
+### Screen Reader Support
+
+- **ARIA Labels**: All interactive elements have descriptive labels
+- **Live Regions**: Status changes are announced automatically
+- **Progress Information**: Detailed progress text with time and percentage
+- **Semantic Roles**: Proper ARIA roles for all components
+- **Focus Management**: Logical tab order and focus indicators
+
+### Testing with Screen Readers
+
+The component has been tested with:
+- **NVDA** (Windows)
+- **JAWS** (Windows)
+- **VoiceOver** (macOS/iOS)
+- **TalkBack** (Android)
+
+## API Reference
+
+### Input Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `audioSrc` | `string \| SafeUrl` | **Required** | URL or SafeUrl of the audio file to play |
+| `color` | `string` | `'#1e90ff'` | Color of the audio wave bars |
+| `height` | `number` | `25` | Height of the wave visualization in pixels |
+| `gap` | `number` | `5` | Gap between wave bars in pixels |
+| `rounded` | `boolean` | `true` | Whether to round the corners of wave bars |
+| `hideBtn` | `boolean` | `false` | Hide the play/pause button |
+| `ariaLabel` | `string` | `'Audio player'` | Main ARIA label for the component |
+| `playButtonLabel` | `string` | `'Play audio'` | ARIA label for the play button |
+| `pauseButtonLabel` | `string` | `'Pause audio'` | ARIA label for the pause button |
+| `progressBarLabel` | `string` | `'Audio progress bar'` | ARIA label for the progress bar |
+
+### Output Properties (Signals)
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `isPaused` | `Signal<boolean>` | Whether the audio is currently paused |
+| `isLoading` | `Signal<boolean>` | Whether the audio is currently loading |
+| `hasError` | `Signal<boolean>` | Whether there was an error loading the audio |
+| `exactCurrentTime` | `Signal<number>` | Current playback time in seconds (exact) |
+| `exactDuration` | `Signal<number>` | Total duration in seconds (exact) |
+| `exactPlayedPercent` | `Signal<number>` | Playback progress as percentage (exact) |
+| `currentTime` | `Signal<number>` | **Deprecated** - Current playback time rounded to seconds |
+| `duration` | `Signal<number>` | **Deprecated** - Total duration rounded to seconds |
+| `playedPercent` | `Signal<number>` | **Deprecated** - Playback progress as percentage (rounded) |
+| `progressText` | `Signal<string>` | Human-readable progress text for screen readers |
+| `statusText` | `Signal<string>` | Current status text for screen readers |
+
+### Methods
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `play(time?: number)` | `time?: number` | Play the audio, optionally from a specific time |
+| `pause()` | - | Pause the audio |
+| `stop()` | - | Stop the audio and reset to beginning |
 
 
-## Source
+## Contributing
 
-https://github.com/joldibaev/silicon-audio-wave/tree/master/projects/ngx-audio-wave
+We welcome contributions! Please feel free to submit issues and pull requests.
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Support
+
+- 📧 Email: nurlan@joldibaev.uz
+- 🐛 Issues: [GitHub Issues](https://github.com/joldibaev/ngx-audio-wave/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/joldibaev/ngx-audio-wave/discussions)
+
+---
+
+**Made with ❤️ by [Joldibaev Nurlan](https://github.com/joldibaev)**

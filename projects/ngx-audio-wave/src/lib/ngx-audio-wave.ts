@@ -18,18 +18,18 @@ import {
 import {HttpClient} from "@angular/common/http";
 import {isPlatformBrowser} from "@angular/common";
 import {finalize, interval} from "rxjs";
-import {NgxAudioWaveService} from "../service/ngx-audio-wave.service";
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import {NgxAudioWaveService} from './service/ngx-audio-wave.service';
 
 @Component({
-  standalone: false,
   selector: 'ngx-audio-wave',
-  templateUrl: './ngx-audio-wave.component.html',
-  styleUrls: ['./ngx-audio-wave.component.scss'],
+  templateUrl: './ngx-audio-wave.html',
+  styleUrls: ['./ngx-audio-wave.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [NgxAudioWaveService]
 })
-export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
+export class NgxAudioWave implements AfterViewInit, OnDestroy {
   // input-required
   readonly audioSrc = input.required<string | SafeUrl>();
 
@@ -40,13 +40,50 @@ export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
   readonly rounded = input(true, {transform: booleanAttribute});
   readonly hideBtn = input(false, {transform: booleanAttribute});
 
+  // accessibility inputs
+  readonly ariaLabel = input<string>('');
+  readonly playButtonLabel = input('Play audio');
+  readonly pauseButtonLabel = input('Pause audio');
+  readonly progressBarLabel = input('Audio progress bar');
+
   // public
   readonly isPaused = signal(true);
   readonly isLoading = signal(true);
   readonly hasError = signal(false);
+  readonly progressText = computed(() => {
+    const current = this.exactCurrentTime();
+    const duration = this.exactDuration();
+    const percent = this.exactPlayedPercent();
+
+    if (duration === 0) {
+      return 'Audio not loaded';
+    }
+
+    const currentMinutes = Math.floor(current / 60);
+    const currentSeconds = Math.floor(current % 60);
+    const durationMinutes = Math.floor(duration / 60);
+    const durationSeconds = Math.floor(duration % 60);
+
+    return `${currentMinutes}:${currentSeconds.toString().padStart(2, '0')} of ${durationMinutes}:${durationSeconds.toString().padStart(2, '0')} (${Math.round(percent)}% played)`;
+  });
+  readonly statusText = computed(() => {
+    if (this.isLoading()) {
+      return 'Loading audio';
+    }
+
+    if (this.hasError()) {
+      return 'Error loading audio';
+    }
+
+    if (this.isPaused()) {
+      return 'Audio paused';
+    }
+
+    return 'Audio playing';
+  });
 
   // public-exact
-  readonly exactPlayedPercent = computed(()=>{
+  readonly exactPlayedPercent = computed(() => {
     const percent = this.calculatePercent(this.exactDuration(), this.exactCurrentTime());
     return (percent < 100 ? percent : 100);
   });
@@ -189,5 +226,46 @@ export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
   playing(event: Event) {
     if (!(event.target instanceof HTMLAudioElement)) return;
     console.log(event.target.currentTime)
+  }
+
+  onKeyDown(event: KeyboardEvent) {
+    if (!this.isPlatformBrowser) return;
+
+    const audio = this.audioRef().nativeElement;
+    const duration = this.exactDuration();
+
+    switch (event.key) {
+      case ' ':
+      case 'Enter':
+        event.preventDefault();
+        if (this.isPaused()) {
+          this.play();
+        } else {
+          this.pause();
+        }
+        break;
+
+      case 'ArrowLeft':
+        event.preventDefault();
+        const leftTime = Math.max(0, audio.currentTime - 5);
+        this.play(leftTime);
+        break;
+
+      case 'ArrowRight':
+        event.preventDefault();
+        const rightTime = Math.min(duration, audio.currentTime + 5);
+        this.play(rightTime);
+        break;
+
+      case 'Home':
+        event.preventDefault();
+        this.play(0);
+        break;
+
+      case 'End':
+        event.preventDefault();
+        this.play(duration);
+        break;
+    }
   }
 }

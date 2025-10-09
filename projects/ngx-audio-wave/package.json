@@ -1,6 +1,22 @@
 {
   "name": "ngx-audio-wave",
-  "version": "20.1.0",
+  "version": "20.2.0",
+  "description": "A modern, accessible audio wave visualization component for Angular 20+ with comprehensive keyboard navigation and screen reader support.",
+  "main": "fesm2022/ngx-audio-wave.mjs",
+  "module": "fesm2022/ngx-audio-wave.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./fesm2022/ngx-audio-wave.mjs",
+      "types": "./index.d.ts"
+    }
+  },
+  "files": [
+    "fesm2022",
+    "index.d.ts",
+    "package.json",
+    "README.md"
+  ],
   "peerDependencies": {
     "@angular/common": ">=20.0.0 <21.0.0",
     "@angular/core": ">=20.0.0 <21.0.0"
@@ -11,12 +27,15 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joldibaev/silicon-audio-wave"
+    "url": "git+https://github.com/joldibaev/ngx-audio-wave.git"
   },
+  "homepage": "https://github.com/joldibaev/ngx-audio-wave#readme",
   "author": {
     "name": "Joldibaev Nurlan",
-    "email": "nurlan@joldibaev.uz"
+    "email": "nurlan@joldibaev.uz",
+    "url": "https://github.com/joldibaev"
   },
+  "license": "MIT",
   "keywords": [
     "ngx",
     "angular",
@@ -25,9 +44,30 @@
     "wave",
     "player",
     "music",
-    "sound"
+    "sound",
+    "visualization",
+    "accessibility",
+    "a11y",
+    "keyboard",
+    "screen-reader",
+    "aria",
+    "wcag",
+    "signals",
+    "standalone",
+    "typescript"
   ],
   "bugs": {
-    "url": "https://github.com/joldibaev/silicon-audio-wave/issues"
+    "url": "https://github.com/joldibaev/ngx-audio-wave/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/joldibaev"
   }
 }
