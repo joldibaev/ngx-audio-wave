@@ -30,40 +30,52 @@ import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
-  audioSrc = input.required<string | SafeUrl>();
+  // input-required
+  readonly audioSrc = input.required<string | SafeUrl>();
 
-  color = input('#1e90ff');
-  height = input(25, {transform: numberAttribute});
-  gap = input(5, {transform: numberAttribute})
-  rounded = input(true, {transform: booleanAttribute});
-  hideBtn = input(false, {transform: booleanAttribute});
+  // input-optional
+  readonly color = input('#1e90ff');
+  readonly height = input(25, {transform: numberAttribute});
+  readonly gap = input(5, {transform: numberAttribute})
+  readonly rounded = input(true, {transform: booleanAttribute});
+  readonly hideBtn = input(false, {transform: booleanAttribute});
 
-  hasError = signal(false);
-  exactPlayedPercent = signal(0);
-  exactCurrentTime = signal(0);
-  isPaused = signal(true);
-  isLoading = signal(true);
+  // public
+  readonly isPaused = signal(true);
+  readonly isLoading = signal(true);
+  readonly hasError = signal(false);
 
-  exactDuration = signal(0);
-  protected normalizedData = signal<number[]>([]);
+  // public-exact
+  readonly exactPlayedPercent = computed(()=>{
+    const percent = this.calculatePercent(this.exactDuration(), this.exactCurrentTime());
+    return (percent < 100 ? percent : 100);
+  });
+  readonly exactCurrentTime = signal(0);
+  readonly exactDuration = signal(0);
 
-  protected clipPath = computed(() => `inset(0px ${100 - this.exactPlayedPercent()}% 0px 0px)`)
+  // public-rounded
+  /** @deprecated This property will be removed in version 21.0.0. Use exactPlayedPercent instead. */
+  readonly playedPercent = computed(() => Math.round(this.exactPlayedPercent()))
+  /** @deprecated This property will be removed in version 21.0.0. Use exactCurrentTime instead. */
+  readonly currentTime = computed(() => Math.round(this.exactCurrentTime()))
+  /** @deprecated This property will be removed in version 21.0.0. Use exactDuration instead. */
+  readonly duration = computed(() => Math.round(this.exactDuration()));
+
+  // component-dev
+  protected readonly normalizedData = signal<number[]>([]);
+  protected readonly clipPath = computed(() => `inset(0px ${100 - this.exactPlayedPercent()}% 0px 0px)`)
+  protected readonly width = computed(() => this.audioWaveService.samples * this.gap());
 
   // injecting
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isPlatformBrowser = isPlatformBrowser(this.platformId);
-
   private readonly domSanitizer = inject(DomSanitizer);
   private readonly httpClient = inject(HttpClient);
   private readonly audioWaveService = inject(NgxAudioWaveService);
   private readonly destroyRef = inject(DestroyRef);
 
+  // view
   private audioRef = viewChild.required<ElementRef<HTMLAudioElement>>('audioRef');
-
-  playedPercent = computed(() => Math.round(this.exactPlayedPercent()))
-  currentTime = computed(() => Math.round(this.exactCurrentTime()))
-  duration = computed(() => Math.round(this.exactDuration()));
-  width = computed(() => this.audioWaveService.samples * this.gap());
 
   ngAfterViewInit() {
     if (this.isPlatformBrowser) {
@@ -124,13 +136,7 @@ export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
       .subscribe({
         next: () => {
           const audio = this.audioRef().nativeElement;
-          if (audio) {
-            const percent = this.calculatePercent(this.exactDuration(), audio.currentTime);
-            this.exactPlayedPercent.set(percent < 100 ? percent : 100);
-            this.exactCurrentTime.set(audio.currentTime);
-
-            this.isPaused.set(audio.paused);
-          }
+          this.exactCurrentTime.set(audio.currentTime);
         }
       })
   }
@@ -173,5 +179,15 @@ export class NgxAudioWaveComponent implements AfterViewInit, OnDestroy {
           this.hasError.set(true)
         }
       });
+  }
+
+  pauseChange(event: Event) {
+    if (!(event.target instanceof HTMLAudioElement)) return;
+    this.isPaused.set(event.target.paused);
+  }
+
+  playing(event: Event) {
+    if (!(event.target instanceof HTMLAudioElement)) return;
+    console.log(event.target.currentTime)
   }
 }
