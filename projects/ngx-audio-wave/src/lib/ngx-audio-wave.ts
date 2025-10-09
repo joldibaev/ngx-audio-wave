@@ -223,11 +223,6 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     this.isPaused.set(event.target.paused);
   }
 
-  playing(event: Event) {
-    if (!(event.target instanceof HTMLAudioElement)) return;
-    console.log(event.target.currentTime)
-  }
-
   onKeyDown(event: KeyboardEvent) {
     if (!this.isPlatformBrowser) return;
 

@@ -1,4 +1,6 @@
-<audio (pause)="pauseChange($event)" (play)="pauseChange($event)" (playing)="playing($event)" #audioRef
+<audio (pause)="pauseChange($event)"
+       (play)="pauseChange($event)"
+       #audioRef
        [src]="audioSrc()"></audio>
 
 <div [style.--ngx-audio-wave-color]="color()"
