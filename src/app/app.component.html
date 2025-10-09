@@ -264,6 +264,76 @@
   </div>
 </section>
 
+<!-- Loop Control -->
+<section>
+  <h3>Loop Control</h3>
+
+  <div>
+    <h4>Basic Loop Control</h4>
+    <ngx-audio-wave
+      #loopPlayer
+      [audioSrc]="audioSrc()"
+      [loop]="false"
+      ariaLabel="Loop control demo"
+    ></ngx-audio-wave>
+
+    <div class="loop-info">
+      <p>Looping: {{ loopPlayer.isLooping() ? '🔄 Enabled' : '⏹️ Disabled' }}</p>
+    </div>
+
+    <div class="custom-controls">
+      <button class="control-btn" (click)="loopPlayer.enableLoop()">🔄 Enable Loop</button>
+      <button class="control-btn" (click)="loopPlayer.disableLoop()">⏹️ Disable Loop</button>
+      <button class="control-btn" (click)="loopPlayer.toggleLoop()">🔄/⏹️ Toggle Loop</button>
+    </div>
+  </div>
+
+  <div>
+    <h4>Auto-Loop Examples</h4>
+    <p>Background music with auto-loop enabled:</p>
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [loop]="true"
+      [volume]="0.3"
+      ariaLabel="Background music with auto-loop"
+    ></ngx-audio-wave>
+
+    <p>Sound effect with auto-loop (short clip):</p>
+    <ngx-audio-wave
+      [audioSrc]="audioSrc()"
+      [loop]="true"
+      [volume]="0.5"
+      [height]="15"
+      ariaLabel="Looping sound effect"
+    ></ngx-audio-wave>
+  </div>
+
+  <div>
+    <h4>Dynamic Loop Control</h4>
+    <ngx-audio-wave
+      #dynamicLoop
+      [audioSrc]="audioSrc()"
+      [hideBtn]="true"
+      ariaLabel="Dynamic loop control demo"
+    ></ngx-audio-wave>
+
+    <div class="loop-info">
+      <p>Looping: {{ dynamicLoop.isLooping() ? '🔄 Enabled' : '⏹️ Disabled' }}</p>
+    </div>
+
+    <div class="custom-controls">
+      <button 
+        class="control-btn" 
+        [class.active]="dynamicLoop.isLooping()"
+        (click)="dynamicLoop.toggleLoop()">
+        {{ dynamicLoop.isLooping() ? '🔄 Stop Looping' : '🔄 Start Looping' }}
+      </button>
+      <button class="control-btn" (click)="dynamicLoop.play()">▶️ Play</button>
+      <button class="control-btn" (click)="dynamicLoop.pause()">⏸️ Pause</button>
+    </div>
+  </div>
+</section>
+
 <!-- Dimensions -->
 <section>
   <h3>Dimensions</h3>

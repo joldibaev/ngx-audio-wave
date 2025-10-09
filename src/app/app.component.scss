@@ -144,3 +144,25 @@ kbd {
     font-weight: 500;
   }
 }
+
+.loop-info {
+  background-color: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+
+  p {
+    margin: 0;
+    color: #2e7d32;
+    font-weight: 500;
+  }
+}
+
+.control-btn.active {
+  background-color: #4caf50;
+  
+  &:hover {
+    background-color: #45a049;
+  }
+}

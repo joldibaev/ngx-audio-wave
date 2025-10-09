@@ -30,10 +30,10 @@ import { NgxAudioWaveService } from './service/ngx-audio-wave.service';
   providers: [NgxAudioWaveService],
 })
 export class NgxAudioWave implements AfterViewInit, OnDestroy {
-  // input-required
+  // required inputs
   readonly audioSrc = input.required<string | SafeUrl>();
 
-  // input-optional
+  // optional inputs
   readonly color = input('#1e90ff');
   readonly height = input(25, { transform: numberAttribute });
   readonly gap = input(5, { transform: numberAttribute });
@@ -42,6 +42,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   readonly skip = input(5, { transform: numberAttribute });
   readonly volume = input(1, { transform: numberAttribute });
   readonly playbackRate = input(1, { transform: numberAttribute });
+  readonly loop = input(false, { transform: booleanAttribute });
 
   // accessibility inputs
   readonly ariaLabel = input<string>('');
@@ -49,12 +50,13 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   readonly pauseButtonLabel = input('Pause audio');
   readonly progressBarLabel = input('Audio progress bar');
 
-  // public
+  // public state signals
   readonly isPaused = signal(true);
   readonly isLoading = signal(true);
   readonly hasError = signal(false);
   readonly currentVolume = signal(1);
   readonly currentPlaybackRate = signal(1);
+  readonly isLooping = signal(false);
   readonly progressText = computed(() => {
     const current = this.exactCurrentTime();
     const duration = this.exactDuration();
@@ -98,7 +100,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   readonly exactCurrentTime = signal(0);
   readonly exactDuration = signal(0);
 
-  // public-rounded
+  // deprecated signals
   /** @deprecated This property will be removed in version 21.0.0. Use exactPlayedPercent instead. */
   readonly playedPercent = computed(() =>
     Math.round(this.exactPlayedPercent())
@@ -108,7 +110,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   /** @deprecated This property will be removed in version 21.0.0. Use exactDuration instead. */
   readonly duration = computed(() => Math.round(this.exactDuration()));
 
-  // component-dev
+  // component internal signals
   protected readonly normalizedData = signal<number[]>([]);
   protected readonly clipPath = computed(
     () => `inset(0px ${100 - this.exactPlayedPercent()}% 0px 0px)`
@@ -129,11 +131,13 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   private audioRef =
     viewChild.required<ElementRef<HTMLAudioElement>>('audioRef');
 
+  // lifecycle hooks
   ngAfterViewInit() {
     if (this.isPlatformBrowser) {
       this.fetchAudio(this.audioSrc());
       this.setVolume(this.volume());
       this.setPlaybackRate(this.playbackRate());
+      this.setLoop(this.loop());
 
       this.startInterval();
     }
@@ -143,6 +147,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     this.stop();
   }
 
+  // playback control
   play(time = 0) {
     if (!this.isPlatformBrowser) return;
 
@@ -169,6 +174,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     this.pause();
   }
 
+  // volume
   setVolume(volume: number) {
     if (!this.isPlatformBrowser) return;
 
@@ -194,6 +200,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     }
   }
 
+  // playback speed
   setPlaybackRate(rate: number) {
     if (!this.isPlatformBrowser) return;
 
@@ -219,6 +226,28 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     this.setPlaybackRate(newRate);
   }
 
+  // loop
+  setLoop(loop: boolean) {
+    if (!this.isPlatformBrowser) return;
+
+    const audio = this.audioRef().nativeElement;
+    audio.loop = loop;
+    this.isLooping.set(loop);
+  }
+
+  enableLoop() {
+    this.setLoop(true);
+  }
+
+  disableLoop() {
+    this.setLoop(false);
+  }
+
+  toggleLoop() {
+    this.setLoop(!this.isLooping());
+  }
+
+  // user interaction
   setTime(mouseEvent: MouseEvent) {
     const offsetX = mouseEvent.offsetX;
     const width = this.width;
@@ -230,6 +259,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     void this.play(time);
   }
 
+  // private helpers
   private calculatePercent(total: number, value: number) {
     return (value / total) * 100 || 0;
   }
@@ -295,6 +325,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     this.isPaused.set(event.target.paused);
   }
 
+  // event handlers
   protected onKeyDown(event: KeyboardEvent) {
     if (!this.isPlatformBrowser) return;
 

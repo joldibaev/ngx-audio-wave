@@ -143,6 +143,27 @@ export class AppComponent {}
 <p>Current speed: {{ player.currentPlaybackRate() }}x</p>
 ```
 
+### Loop Control
+
+```html
+<ngx-audio-wave #player audioSrc="assets/audio.mp3"></ngx-audio-wave>
+
+<div class="loop-controls">
+  <button (click)="player.enableLoop()">🔄 Enable Loop</button>
+  <button (click)="player.disableLoop()">⏹️ Disable Loop</button>
+  <button (click)="player.toggleLoop()">🔄/⏹️ Toggle Loop</button>
+</div>
+
+<p>Looping: {{ player.isLooping() ? 'Enabled' : 'Disabled' }}</p>
+
+<!-- Auto-loop example -->
+<ngx-audio-wave 
+  [loop]="true" 
+  audioSrc="assets/background-music.mp3"
+  ariaLabel="Background music with auto-loop">
+</ngx-audio-wave>
+```
+
 ### Different Heights and Gaps
 
 ```html
@@ -203,6 +224,7 @@ The component has been tested with:
 | `skip`             | `number`            | `5`                    | Seconds to skip when using arrow keys      |
 | `volume`           | `number`            | `1`                    | Initial volume level (0-1)                 |
 | `playbackRate`     | `number`            | `1`                    | Initial playback speed (0.25-4)            |
+| `loop`             | `boolean`           | `false`                | Whether to loop the audio                  |
 | `ariaLabel`        | `string`            | `'Audio player'`       | Main ARIA label for the component          |
 | `playButtonLabel`  | `string`            | `'Play audio'`         | ARIA label for the play button             |
 | `pauseButtonLabel` | `string`            | `'Pause audio'`        | ARIA label for the pause button            |
@@ -217,6 +239,7 @@ The component has been tested with:
 | `hasError`           | `Signal<boolean>` | Whether there was an error loading the audio               |
 | `currentVolume`      | `Signal<number>`  | Current volume level (0-1)                                 |
 | `currentPlaybackRate`| `Signal<number>`  | Current playback speed (0.25-4)                            |
+| `isLooping`          | `Signal<boolean>` | Whether the audio is currently looping                     |
 | `exactCurrentTime`   | `Signal<number>`  | Current playback time in seconds (exact)                   |
 | `exactDuration`      | `Signal<number>`  | Total duration in seconds (exact)                          |
 | `exactPlayedPercent` | `Signal<number>`  | Playback progress as percentage (exact)                    |
@@ -241,6 +264,10 @@ The component has been tested with:
 | `resetPlaybackRate()` | -               | Reset playback speed to 1x                      |
 | `increasePlaybackRate()`| -             | Increase playback speed by 0.25x                |
 | `decreasePlaybackRate()`| -             | Decrease playback speed by 0.25x                |
+| `setLoop(loop)`         | `loop: boolean`| Enable or disable audio looping                 |
+| `enableLoop()`          | -             | Enable audio looping                            |
+| `disableLoop()`         | -             | Disable audio looping                           |
+| `toggleLoop()`          | -             | Toggle loop state                               |
 
 ## Contributing
 
