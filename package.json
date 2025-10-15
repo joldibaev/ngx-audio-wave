@@ -5,6 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "github:build": "npm run library:build && ng build --configuration github-pages",
+    "github:deploy": "npx angular-cli-ghpages --dir=dist/ngx-audio-wave-app/browser --no-silent",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:ngx-audio-wave-app": "node dist/ngx-audio-wave-app/server/server.mjs",
