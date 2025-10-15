@@ -14,6 +14,8 @@ A modern, accessible audio wave visualization component for Angular 20+ with com
 
 ## Demo
 
+**🎮 [Live Demo](https://joldibaev.github.io/ngx-audio-wave/)** - Try the interactive demo
+
 ![Audio Wave Demo](https://github.com/joldibaev/ngx-audio-wave/raw/master/public/demo3.png)
 
 ## Quick Start
