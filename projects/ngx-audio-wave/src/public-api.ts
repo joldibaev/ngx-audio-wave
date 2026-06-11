@@ -3,3 +3,4 @@
  */
 
 export * from './lib/ngx-audio-wave';
+export * from './lib/waveform.utils';

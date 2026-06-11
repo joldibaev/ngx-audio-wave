@@ -1,10 +1,10 @@
 {
   "name": "ngx-audio-wave",
-  "version": "21.0.2",
-  "description": "A modern, accessible audio wave visualization component for Angular 20+ with comprehensive keyboard navigation and screen reader support.",
+  "version": "22.0.0",
+  "description": "A modern, accessible audio wave visualization component for Angular 22+ with comprehensive keyboard navigation and screen reader support.",
   "peerDependencies": {
-    "@angular/common": ">=21.0.0 <22.0.0",
-    "@angular/core": ">=21.0.0 <22.0.0"
+    "@angular/common": ">=22.0.0 <23.0.0",
+    "@angular/core": ">=22.0.0 <23.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
@@ -45,8 +45,8 @@
     "url": "https://github.com/joldibaev/ngx-audio-wave/issues"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0",
+    "npm": ">=10.0.0"
   },
   "publishConfig": {
     "access": "public"

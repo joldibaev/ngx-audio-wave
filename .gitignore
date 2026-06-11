@@ -37,6 +37,9 @@ yarn-error.log
 testem.log
 /typings
 
+# Generated package metadata
+/projects/ngx-audio-wave/README.md
+
 # System files
 .DS_Store
 Thumbs.db

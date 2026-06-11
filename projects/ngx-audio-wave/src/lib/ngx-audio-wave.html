@@ -1,8 +1,11 @@
 <audio
   #audioRef
-  [src]="audioSrc()"
+  [src]="audioElementSrc()"
+  (durationchange)="durationChange($event)"
+  (loadedmetadata)="durationChange($event)"
   (pause)="pauseChange($event)"
   (play)="pauseChange($event)"
+  (timeupdate)="timeChange($event)"
   hidden="hidden"
 ></audio>
 
@@ -60,49 +63,73 @@
     <div
       class="ngx-audio-wave"
       [attr.aria-label]="progressBarLabel()"
+      [attr.aria-orientation]="'horizontal'"
       [attr.aria-valuemax]="100"
       [attr.aria-valuemin]="0"
       [attr.aria-valuenow]="exactPlayedPercent()"
       [attr.aria-valuetext]="progressText()"
-      [style.height.px]="height()"
+      [style.height.px]="visualHeight()"
       [style.width.px]="width()"
       (click)="setTime($event)"
       (keydown)="onKeyDown($event)"
-      role="progressbar"
+      (mouseleave)="clearHoverPosition()"
+      (mousemove)="setHoverPosition($event)"
+      role="slider"
       tabindex="0"
     >
       @if (!isLoading()) {
         <svg
-          class="real"
-          [attr.viewBox]="`0 0 ${width()} ${height()}`"
+          class="ngx-audio-wave-svg"
+          [attr.viewBox]="`0 0 ${width()} ${visualHeight()}`"
           aria-hidden="true"
         >
-          @for (rect of normalizedData(); track rect; let index = $index) {
+          <defs>
+            <linearGradient
+              [attr.id]="gradientId"
+              [attr.x2]="width()"
+              gradientUnits="userSpaceOnUse"
+              x1="0"
+              y1="0"
+              y2="0"
+            >
+              <stop offset="0%" stop-color="var(--ngx-audio-wave-color)" />
+              <stop
+                [attr.offset]="progressOffset()"
+                stop-color="var(--ngx-audio-wave-color)"
+              />
+              <stop
+                [attr.offset]="progressOffset()"
+                stop-color="var(--ngx-audio-wave-color)"
+                stop-opacity="0.3"
+              />
+              <stop
+                offset="100%"
+                stop-color="var(--ngx-audio-wave-color)"
+                stop-opacity="0.3"
+              />
+            </linearGradient>
+          </defs>
+
+          @for (rect of normalizedData(); track index; let index = $index) {
             <rect
-              [attr.height]="rect * height()"
+              [attr.fill]="`url(#${gradientId})`"
+              [attr.height]="rect * visualHeight()"
               [attr.rx]="rounded() ? 1 : 0"
               [attr.ry]="rounded() ? 1 : 0"
               [attr.width]="2"
-              [attr.x]="index * gap()"
-              [attr.y]="height() - rect * height()"
+              [attr.x]="index * visualGap()"
+              [attr.y]="visualHeight() - rect * visualHeight()"
             ></rect>
           }
         </svg>
 
-        <div class="fake" [style.clip-path]="clipPath()">
-          <svg [attr.viewBox]="`0 0 ${width()} ${height()}`" aria-hidden="true">
-            @for (rect of normalizedData(); track rect; let index = $index) {
-              <rect
-                [attr.height]="rect * height()"
-                [attr.rx]="rounded() ? 1 : 0"
-                [attr.ry]="rounded() ? 1 : 0"
-                [attr.width]="2"
-                [attr.x]="index * gap()"
-                [attr.y]="height() - rect * height()"
-              ></rect>
-            }
-          </svg>
-        </div>
+        @if (isHovering()) {
+          <span
+            class="ngx-audio-wave-hover-guide"
+            [style.left.px]="hoverOffset()"
+            aria-hidden="true"
+          ></span>
+        }
       } @else {
         <div
           class="ngx-audio-wave-loading"

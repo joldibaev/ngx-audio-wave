@@ -1,11 +1,10 @@
 import {
-  AfterViewInit,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   ElementRef,
+  effect,
   inject,
   input,
   numberAttribute,
@@ -17,19 +16,19 @@ import {
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-import { finalize, interval } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { NgxAudioWaveService } from './service/ngx-audio-wave.service';
+import { filterAudioBufferData, normalizeAudioData } from './waveform.utils';
+
+let nextGradientId = 0;
 
 @Component({
   selector: 'ngx-audio-wave',
   templateUrl: './ngx-audio-wave.html',
   styleUrls: ['./ngx-audio-wave.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [NgxAudioWaveService],
 })
-export class NgxAudioWave implements AfterViewInit, OnDestroy {
+export class NgxAudioWave implements OnDestroy {
   // required inputs
   readonly audioSrc = input.required<string | SafeUrl>();
 
@@ -43,6 +42,7 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   readonly volume = input(1, { transform: numberAttribute });
   readonly playbackRate = input(1, { transform: numberAttribute });
   readonly loop = input(false, { transform: booleanAttribute });
+  readonly samples = input(50, { transform: numberAttribute });
 
   // accessibility inputs
   readonly ariaLabel = input<string>('');
@@ -100,98 +100,148 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
   readonly exactCurrentTime = signal(0);
   readonly exactDuration = signal(0);
 
-  // deprecated signals
-  /** @deprecated This property will be removed in version 21.0.0. Use exactPlayedPercent instead. */
-  readonly playedPercent = computed(() =>
-    Math.round(this.exactPlayedPercent())
-  );
-  /** @deprecated This property will be removed in version 21.0.0. Use exactCurrentTime instead. */
-  readonly currentTime = computed(() => Math.round(this.exactCurrentTime()));
-  /** @deprecated This property will be removed in version 21.0.0. Use exactDuration instead. */
-  readonly duration = computed(() => Math.round(this.exactDuration()));
-
-  // component internal signals
-  protected readonly normalizedData = signal<number[]>([]);
-  protected readonly clipPath = computed(
-    () => `inset(0px ${100 - this.exactPlayedPercent()}% 0px 0px)`
-  );
-  protected readonly width = computed(
-    () => this.audioWaveService.samples * this.gap()
-  );
-
   // injecting
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isPlatformBrowser = isPlatformBrowser(this.platformId);
   private readonly domSanitizer = inject(DomSanitizer);
   private readonly httpClient = inject(HttpClient);
-  private readonly audioWaveService = inject(NgxAudioWaveService);
-  private readonly destroyRef = inject(DestroyRef);
+
+  // component internal signals
+  protected readonly gradientId = `ngx-audio-wave-gradient-${nextGradientId++}`;
+  protected readonly audioElementSrc = computed(
+    () => this.sanitizeAudioSrc(this.audioSrc()) ?? ''
+  );
+  protected readonly normalizedData = signal<number[]>([]);
+  protected readonly isHovering = signal(false);
+  protected readonly hoverOffset = signal(0);
+  protected readonly progressOffset = computed(
+    () => `${this.exactPlayedPercent()}%`
+  );
+  protected readonly visualHeight = computed(() => Math.max(1, this.height()));
+  protected readonly visualGap = computed(() => Math.max(1, this.gap()));
+  protected readonly visualSamples = computed(() =>
+    Math.max(1, Math.floor(this.samples()))
+  );
+  protected readonly width = computed(
+    () => this.visualSamples() * this.visualGap()
+  );
 
   // view
-  private audioRef =
-    viewChild.required<ElementRef<HTMLAudioElement>>('audioRef');
+  private audioRef = viewChild<ElementRef<HTMLAudioElement>>('audioRef');
+  private audioFetchSubscription?: Subscription;
+  private audioLoadId = 0;
+  private animationFrameId: number | null = null;
+  private lastNonZeroVolume = 1;
 
-  // lifecycle hooks
-  ngAfterViewInit() {
-    if (this.isPlatformBrowser) {
-      this.fetchAudio(this.audioSrc());
-      this.setVolume(this.volume());
-      this.setPlaybackRate(this.playbackRate());
-      this.setLoop(this.loop());
+  constructor() {
+    effect(() => {
+      if (!this.isPlatformBrowser || !this.audioRef()) {
+        return;
+      }
 
-      this.startInterval();
-    }
+      this.fetchAudio(this.audioSrc(), this.visualSamples());
+    });
+
+    effect(() => {
+      const volume = this.clampVolume(this.volume());
+      const playbackRate = this.clampPlaybackRate(this.playbackRate());
+      const loop = this.loop();
+
+      this.currentVolume.set(volume);
+      this.currentPlaybackRate.set(playbackRate);
+      this.isLooping.set(loop);
+
+      if (volume > 0) {
+        this.lastNonZeroVolume = volume;
+      }
+
+      const audio = this.getAudioElement();
+      if (!this.isPlatformBrowser || !audio) {
+        return;
+      }
+
+      audio.volume = volume;
+      audio.playbackRate = playbackRate;
+      audio.loop = loop;
+    });
   }
 
   ngOnDestroy() {
+    this.audioFetchSubscription?.unsubscribe();
+    this.stopCurrentTimeSync();
     this.stop();
   }
 
   // playback control
-  play(time = 0) {
+  play(time?: number) {
     if (!this.isPlatformBrowser) return;
 
-    const audio = this.audioRef().nativeElement;
-    void audio.play();
+    const audio = this.getAudioElement();
+    if (!audio) return;
 
-    if (time) {
-      audio.currentTime = time;
+    if (!this.audioElementSrc()) {
+      this.hasError.set(true);
+      return;
     }
+
+    if (time !== undefined) {
+      this.seekTo(time);
+    }
+
+    void audio.play().catch(error => {
+      if (error instanceof DOMException && error.name === 'NotSupportedError') {
+        this.hasError.set(true);
+        return;
+      }
+
+      console.error(error);
+    });
   }
 
   pause() {
     if (!this.isPlatformBrowser) return;
 
-    const audio = this.audioRef().nativeElement;
+    const audio = this.getAudioElement();
+    if (!audio) return;
+
     audio.pause();
   }
 
   stop() {
     if (!this.isPlatformBrowser) return;
 
-    const audio = this.audioRef().nativeElement;
+    const audio = this.getAudioElement();
+    if (!audio) return;
+
     audio.currentTime = 0;
     this.pause();
   }
 
-  // volume
   setVolume(volume: number) {
     if (!this.isPlatformBrowser) return;
 
-    const audio = this.audioRef().nativeElement;
-    const clampedVolume = Math.max(0, Math.min(1, volume));
+    const audio = this.getAudioElement();
+    if (!audio) return;
+
+    const clampedVolume = this.clampVolume(volume);
     audio.volume = clampedVolume;
     this.currentVolume.set(clampedVolume);
+    if (clampedVolume > 0) {
+      this.lastNonZeroVolume = clampedVolume;
+    }
   }
 
+  /** @deprecated Use setVolume(0) instead. */
   mute() {
     this.setVolume(0);
   }
 
+  /** @deprecated Use setVolume(previousNonZeroVolume) with your own stored value instead. */
   unmute() {
-    this.setVolume(this.volume());
+    this.setVolume(this.lastNonZeroVolume);
   }
 
+  /** @deprecated Use setVolume(currentVolume() === 0 ? value : 0) instead. */
   toggleMute() {
     if (this.currentVolume() === 0) {
       this.unmute();
@@ -200,136 +250,272 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
     }
   }
 
-  // playback speed
   setPlaybackRate(rate: number) {
     if (!this.isPlatformBrowser) return;
 
-    const audio = this.audioRef().nativeElement;
-    const clampedRate = Math.max(0.25, Math.min(4, rate)); // Ограничиваем от 0.25x до 4x
+    const audio = this.getAudioElement();
+    if (!audio) return;
+
+    const clampedRate = this.clampPlaybackRate(rate);
     audio.playbackRate = clampedRate;
     this.currentPlaybackRate.set(clampedRate);
   }
 
+  /** @deprecated Use setPlaybackRate(1) instead. */
   resetPlaybackRate() {
     this.setPlaybackRate(1);
   }
 
+  /** @deprecated Use setPlaybackRate(currentPlaybackRate() + 0.25) instead. */
   increasePlaybackRate() {
     const currentRate = this.currentPlaybackRate();
     const newRate = Math.min(4, currentRate + 0.25);
     this.setPlaybackRate(newRate);
   }
 
+  /** @deprecated Use setPlaybackRate(currentPlaybackRate() - 0.25) instead. */
   decreasePlaybackRate() {
     const currentRate = this.currentPlaybackRate();
     const newRate = Math.max(0.25, currentRate - 0.25);
     this.setPlaybackRate(newRate);
   }
 
-  // loop
   setLoop(loop: boolean) {
     if (!this.isPlatformBrowser) return;
 
-    const audio = this.audioRef().nativeElement;
+    const audio = this.getAudioElement();
+    if (!audio) return;
+
     audio.loop = loop;
     this.isLooping.set(loop);
   }
 
+  /** @deprecated Use setLoop(true) instead. */
   enableLoop() {
     this.setLoop(true);
   }
 
+  /** @deprecated Use setLoop(false) instead. */
   disableLoop() {
     this.setLoop(false);
   }
 
+  /** @deprecated Use setLoop(!isLooping()) instead. */
   toggleLoop() {
     this.setLoop(!this.isLooping());
   }
 
   // user interaction
   setTime(mouseEvent: MouseEvent) {
-    const offsetX = mouseEvent.offsetX;
-    const width = this.width;
-
-    const clickPercent = this.calculatePercent(width(), offsetX);
+    const pointer = this.getPointerPosition(mouseEvent);
+    const clickPercent = this.calculatePercent(pointer.width, pointer.offset);
 
     const time = (clickPercent * this.exactDuration()) / 100;
 
-    void this.play(time);
+    this.seekTo(time);
+  }
+
+  protected setHoverPosition(mouseEvent: MouseEvent) {
+    this.isHovering.set(true);
+    this.hoverOffset.set(this.getPointerPosition(mouseEvent).offset);
+  }
+
+  protected clearHoverPosition() {
+    this.isHovering.set(false);
   }
 
   // private helpers
   private calculatePercent(total: number, value: number) {
-    return (value / total) * 100 || 0;
+    if (total <= 0) {
+      return 0;
+    }
+
+    const percent = (value / total) * 100;
+    return Number.isFinite(percent) ? percent : 0;
   }
 
-  private startInterval() {
-    interval(100)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          const audio = this.audioRef().nativeElement;
-          this.exactCurrentTime.set(audio.currentTime);
-        },
-      });
+  private clampVolume(volume: number) {
+    return Math.max(0, Math.min(1, volume));
   }
 
-  private fetchAudio(audioSrc: string | SafeUrl) {
-    this.isLoading.set(true);
+  private clampPlaybackRate(rate: number) {
+    return Math.max(0.25, Math.min(4, rate));
+  }
 
-    const src =
-      typeof audioSrc === 'object'
-        ? this.domSanitizer.sanitize(SecurityContext.URL, audioSrc)
-        : audioSrc;
-    if (!src) {
-      console.error('Invalid SafeUrl: could not sanitize');
-      this.hasError.set(true);
+  private getPointerPosition(event: MouseEvent) {
+    const target = event.currentTarget;
+    if (!(target instanceof HTMLElement)) {
+      return { offset: 0, width: this.width() };
+    }
+
+    const rect = target.getBoundingClientRect();
+    return {
+      offset: Math.max(0, Math.min(rect.width, event.clientX - rect.left)),
+      width: rect.width,
+    };
+  }
+
+  private clampTime(time: number) {
+    const duration = this.exactDuration();
+    if (!Number.isFinite(time)) {
+      return 0;
+    }
+
+    return Math.max(0, duration > 0 ? Math.min(duration, time) : time);
+  }
+
+  private seekTo(time: number) {
+    const audio = this.getAudioElement();
+    if (!audio) return;
+
+    const clampedTime = this.clampTime(time);
+    audio.currentTime = clampedTime;
+    this.exactCurrentTime.set(clampedTime);
+  }
+
+  private updateCurrentTime() {
+    const audio = this.getAudioElement();
+    if (!audio) return;
+
+    this.exactCurrentTime.set(audio.currentTime);
+  }
+
+  private getAudioElement() {
+    return this.audioRef()?.nativeElement ?? null;
+  }
+
+  private startCurrentTimeSync() {
+    if (this.animationFrameId !== null) {
       return;
     }
 
-    this.httpClient
+    const sync = () => {
+      this.updateCurrentTime();
+      if (!this.isPaused()) {
+        this.animationFrameId = requestAnimationFrame(sync);
+      } else {
+        this.animationFrameId = null;
+      }
+    };
+
+    this.animationFrameId = requestAnimationFrame(sync);
+  }
+
+  private stopCurrentTimeSync() {
+    if (this.animationFrameId === null) {
+      return;
+    }
+
+    cancelAnimationFrame(this.animationFrameId);
+    this.animationFrameId = null;
+  }
+
+  private fetchAudio(audioSrc: string | SafeUrl, samples: number) {
+    this.audioFetchSubscription?.unsubscribe();
+    const loadId = ++this.audioLoadId;
+    this.isLoading.set(true);
+    this.hasError.set(false);
+    this.exactDuration.set(0);
+    this.exactCurrentTime.set(0);
+    this.normalizedData.set([]);
+
+    const src = this.sanitizeAudioSrc(audioSrc);
+    if (!src) {
+      console.error('Invalid SafeUrl: could not sanitize');
+      this.hasError.set(true);
+      this.isLoading.set(false);
+      return;
+    }
+
+    this.audioFetchSubscription = this.httpClient
       .get(src, { responseType: 'arraybuffer' })
-      .pipe(
-        finalize(() => {
-          this.isLoading.set(false);
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      )
       .subscribe({
-        next: async arrayBuffer => {
-          try {
-            const audioContext = new AudioContext();
-            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-            this.exactDuration.set(audioBuffer.duration);
-
-            const filteredData = this.audioWaveService.filterData(audioBuffer);
-            this.normalizedData.set(
-              this.audioWaveService.normalizeData(filteredData)
-            );
-          } catch (e) {
-            this.hasError.set(true);
-          }
+        next: arrayBuffer => {
+          void this.decodeAudio(arrayBuffer, samples, loadId);
         },
         error: error => {
-          console.error(error);
-
-          this.hasError.set(true);
+          if (loadId === this.audioLoadId) {
+            console.error(error);
+            this.hasError.set(true);
+            this.isLoading.set(false);
+          }
         },
       });
+  }
+
+  private async decodeAudio(
+    arrayBuffer: ArrayBuffer,
+    samples: number,
+    loadId: number
+  ) {
+    let audioContext: AudioContext | null = null;
+
+    try {
+      audioContext = new AudioContext();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      if (loadId !== this.audioLoadId) {
+        return;
+      }
+
+      this.exactDuration.set(audioBuffer.duration);
+
+      const filteredData = filterAudioBufferData(audioBuffer, samples);
+      this.normalizedData.set(normalizeAudioData(filteredData));
+    } catch (error) {
+      if (loadId === this.audioLoadId) {
+        console.error(error);
+        this.hasError.set(true);
+      }
+    } finally {
+      if (audioContext) {
+        await audioContext.close();
+      }
+
+      if (loadId === this.audioLoadId) {
+        this.isLoading.set(false);
+      }
+    }
+  }
+
+  private sanitizeAudioSrc(audioSrc: string | SafeUrl) {
+    return typeof audioSrc === 'object'
+      ? this.domSanitizer.sanitize(SecurityContext.URL, audioSrc)
+      : audioSrc;
   }
 
   protected pauseChange(event: Event) {
     if (!(event.target instanceof HTMLAudioElement)) return;
     this.isPaused.set(event.target.paused);
+    if (event.target.paused) {
+      this.stopCurrentTimeSync();
+      this.updateCurrentTime();
+    } else {
+      this.startCurrentTimeSync();
+    }
+  }
+
+  protected durationChange(event: Event) {
+    if (!(event.target instanceof HTMLAudioElement)) return;
+
+    const duration = event.target.duration;
+    if (Number.isFinite(duration) && duration > 0) {
+      this.exactDuration.set(duration);
+    }
+  }
+
+  protected timeChange(event: Event) {
+    if (!(event.target instanceof HTMLAudioElement)) return;
+
+    this.exactCurrentTime.set(event.target.currentTime);
   }
 
   // event handlers
   protected onKeyDown(event: KeyboardEvent) {
     if (!this.isPlatformBrowser) return;
 
-    const audio = this.audioRef().nativeElement;
+    const audio = this.getAudioElement();
+    if (!audio) return;
+
     const duration = this.exactDuration();
 
     switch (event.key) {
@@ -346,23 +532,23 @@ export class NgxAudioWave implements AfterViewInit, OnDestroy {
       case 'ArrowLeft':
         event.preventDefault();
         const leftTime = Math.max(0, audio.currentTime - this.skip());
-        this.play(leftTime);
+        this.seekTo(leftTime);
         break;
 
       case 'ArrowRight':
         event.preventDefault();
         const rightTime = Math.min(duration, audio.currentTime + this.skip());
-        this.play(rightTime);
+        this.seekTo(rightTime);
         break;
 
       case 'Home':
         event.preventDefault();
-        this.play(0);
+        this.seekTo(0);
         break;
 
       case 'End':
         event.preventDefault();
-        this.play(duration);
+        this.seekTo(duration);
         break;
     }
   }

@@ -1,6 +1,6 @@
 # ngx-audio-wave
 
-A modern, accessible audio wave visualization component for Angular 20+ with comprehensive keyboard navigation and screen reader support.
+A modern, accessible audio wave visualization component for Angular 22+ with comprehensive keyboard navigation and screen reader support.
 
 ## Features
 
@@ -9,7 +9,7 @@ A modern, accessible audio wave visualization component for Angular 20+ with com
 - ♿ **Accessibility First** - WCAG 2.1 compliant with ARIA support
 - 🎨 **Highly Customizable** - Colors, dimensions, gaps, and styling options
 - 📱 **Responsive Design** - Works on all screen sizes
-- 🚀 **Modern Angular** - Built with Angular 20+ signals and standalone components
+- 🚀 **Modern Angular** - Built with Angular 22+ signals and standalone components
 - 🎯 **TypeScript** - Full type safety and IntelliSense support
 
 ## Demo
@@ -26,7 +26,7 @@ A modern, accessible audio wave visualization component for Angular 20+ with com
 npm install ngx-audio-wave
 ```
 
-### Angular 20+ (Standalone Components)
+### Angular 22+ (Standalone Components)
 
 ```ts
 import { NgxAudioWave } from 'ngx-audio-wave';
@@ -45,6 +45,10 @@ import { NgxAudioWave } from 'ngx-audio-wave';
 })
 export class AppComponent {}
 ```
+
+If your app does not already provide Angular HTTP services, add `provideHttpClient()` to your app config.
+
+Remote audio files must allow browser CORS access because the component downloads the file to generate waveform data.
 
 ## Basic Usage
 
@@ -70,8 +74,6 @@ export class AppComponent {}
   <p>Status: {{ player.statusText() }}</p>
 </div>
 ```
-
-> **Note:** Use `exact*` properties instead of deprecated `currentTime`, `duration`, and `playedPercent` for better precision.
 
 ## Examples
 
@@ -118,11 +120,12 @@ export class AppComponent {}
 <ngx-audio-wave #player audioSrc="assets/audio.mp3"></ngx-audio-wave>
 
 <div class="volume-controls">
-  <button (click)="player.mute()">🔇 Mute</button>
-  <button (click)="player.unmute()">🔊 Unmute</button>
-  <button (click)="player.toggleMute()">🔊/🔇 Toggle</button>
+  <button (click)="player.setVolume(0)">🔇 Mute</button>
   <button (click)="player.setVolume(0.5)">50% Volume</button>
   <button (click)="player.setVolume(1)">100% Volume</button>
+  <button (click)="player.setVolume(player.currentVolume() === 0 ? 1 : 0)">
+    Toggle
+  </button>
 </div>
 
 <p>Current volume: {{ player.currentVolume() | percent }}</p>
@@ -134,9 +137,13 @@ export class AppComponent {}
 <ngx-audio-wave #player audioSrc="assets/audio.mp3"></ngx-audio-wave>
 
 <div class="speed-controls">
-  <button (click)="player.decreasePlaybackRate()">⏪ Slower</button>
-  <button (click)="player.resetPlaybackRate()">1x Normal</button>
-  <button (click)="player.increasePlaybackRate()">⏩ Faster</button>
+  <button (click)="player.setPlaybackRate(player.currentPlaybackRate() - 0.25)">
+    ⏪ Slower
+  </button>
+  <button (click)="player.setPlaybackRate(1)">1x Normal</button>
+  <button (click)="player.setPlaybackRate(player.currentPlaybackRate() + 0.25)">
+    ⏩ Faster
+  </button>
   <button (click)="player.setPlaybackRate(0.5)">0.5x</button>
   <button (click)="player.setPlaybackRate(1.5)">1.5x</button>
   <button (click)="player.setPlaybackRate(2)">2x</button>
@@ -151,18 +158,21 @@ export class AppComponent {}
 <ngx-audio-wave #player audioSrc="assets/audio.mp3"></ngx-audio-wave>
 
 <div class="loop-controls">
-  <button (click)="player.enableLoop()">🔄 Enable Loop</button>
-  <button (click)="player.disableLoop()">⏹️ Disable Loop</button>
-  <button (click)="player.toggleLoop()">🔄/⏹️ Toggle Loop</button>
+  <button (click)="player.setLoop(true)">🔄 Enable Loop</button>
+  <button (click)="player.setLoop(false)">⏹️ Disable Loop</button>
+  <button (click)="player.setLoop(!player.isLooping())">
+    🔄/⏹️ Toggle Loop
+  </button>
 </div>
 
 <p>Looping: {{ player.isLooping() ? 'Enabled' : 'Disabled' }}</p>
 
 <!-- Auto-loop example -->
-<ngx-audio-wave 
-  [loop]="true" 
+<ngx-audio-wave
+  [loop]="true"
+  ariaLabel="Background music with auto-loop"
   audioSrc="assets/background-music.mp3"
-  ariaLabel="Background music with auto-loop">
+>
 </ngx-audio-wave>
 ```
 
@@ -186,13 +196,13 @@ This component is built with accessibility as a core feature, ensuring it works 
 
 ### Keyboard Navigation
 
-| Key                | Action                                    |
-| ------------------ | ----------------------------------------- |
-| `Space` or `Enter` | Play/Pause audio                          |
-| `Arrow Left`       | Skip backward (configurable with `skip`)  |
-| `Arrow Right`      | Skip forward (configurable with `skip`)   |
-| `Home`             | Jump to beginning                         |
-| `End`              | Jump to end                               |
+| Key                | Action                                   |
+| ------------------ | ---------------------------------------- |
+| `Space` or `Enter` | Play/Pause audio                         |
+| `Arrow Left`       | Skip backward (configurable with `skip`) |
+| `Arrow Right`      | Skip forward (configurable with `skip`)  |
+| `Home`             | Jump to beginning                        |
+| `End`              | Jump to end                              |
 
 ### Screen Reader Support
 
@@ -202,9 +212,9 @@ This component is built with accessibility as a core feature, ensuring it works 
 - **Semantic Roles**: Proper ARIA roles for all components
 - **Focus Management**: Logical tab order and focus indicators
 
-### Testing with Screen Readers
+### Screen Reader Testing
 
-The component has been tested with:
+Recommended manual test matrix before release:
 
 - **NVDA** (Windows)
 - **JAWS** (Windows)
@@ -221,6 +231,7 @@ The component has been tested with:
 | `color`            | `string`            | `'#1e90ff'`            | Color of the audio wave bars               |
 | `height`           | `number`            | `25`                   | Height of the wave visualization in pixels |
 | `gap`              | `number`            | `5`                    | Gap between wave bars in pixels            |
+| `samples`          | `number`            | `50`                   | Number of waveform bars                    |
 | `rounded`          | `boolean`           | `true`                 | Whether to round the corners of wave bars  |
 | `hideBtn`          | `boolean`           | `false`                | Hide the play/pause button                 |
 | `skip`             | `number`            | `5`                    | Seconds to skip when using arrow keys      |
@@ -234,42 +245,56 @@ The component has been tested with:
 
 ### Output Properties (Signals)
 
-| Property             | Type              | Description                                                |
-| -------------------- | ----------------- | ---------------------------------------------------------- |
-| `isPaused`           | `Signal<boolean>` | Whether the audio is currently paused                      |
-| `isLoading`          | `Signal<boolean>` | Whether the audio is currently loading                     |
-| `hasError`           | `Signal<boolean>` | Whether there was an error loading the audio               |
-| `currentVolume`      | `Signal<number>`  | Current volume level (0-1)                                 |
-| `currentPlaybackRate`| `Signal<number>`  | Current playback speed (0.25-4)                            |
-| `isLooping`          | `Signal<boolean>` | Whether the audio is currently looping                     |
-| `exactCurrentTime`   | `Signal<number>`  | Current playback time in seconds (exact)                   |
-| `exactDuration`      | `Signal<number>`  | Total duration in seconds (exact)                          |
-| `exactPlayedPercent` | `Signal<number>`  | Playback progress as percentage (exact)                    |
-| `currentTime`        | `Signal<number>`  | **Deprecated** - Current playback time rounded to seconds  |
-| `duration`           | `Signal<number>`  | **Deprecated** - Total duration rounded to seconds         |
-| `playedPercent`      | `Signal<number>`  | **Deprecated** - Playback progress as percentage (rounded) |
-| `progressText`       | `Signal<string>`  | Human-readable progress text for screen readers            |
-| `statusText`         | `Signal<string>`  | Current status text for screen readers                     |
+| Property              | Type              | Description                                     |
+| --------------------- | ----------------- | ----------------------------------------------- |
+| `isPaused`            | `Signal<boolean>` | Whether the audio is currently paused           |
+| `isLoading`           | `Signal<boolean>` | Whether the audio is currently loading          |
+| `hasError`            | `Signal<boolean>` | Whether there was an error loading the audio    |
+| `currentVolume`       | `Signal<number>`  | Current volume level (0-1)                      |
+| `currentPlaybackRate` | `Signal<number>`  | Current playback speed (0.25-4)                 |
+| `isLooping`           | `Signal<boolean>` | Whether the audio is currently looping          |
+| `exactCurrentTime`    | `Signal<number>`  | Current playback time in seconds (exact)        |
+| `exactDuration`       | `Signal<number>`  | Total duration in seconds (exact)               |
+| `exactPlayedPercent`  | `Signal<number>`  | Playback progress as percentage (exact)         |
+| `progressText`        | `Signal<string>`  | Human-readable progress text for screen readers |
+| `statusText`          | `Signal<string>`  | Current status text for screen readers          |
 
 ### Methods
 
-| Method                | Parameters      | Description                                     |
-| --------------------- | --------------- | ----------------------------------------------- |
-| `play(time?: number)` | `time?: number` | Play the audio, optionally from a specific time |
-| `pause()`             | -               | Pause the audio                                 |
-| `stop()`              | -               | Stop the audio and reset to beginning           |
-| `setVolume(volume)`   | `volume: number`| Set volume level (0-1)                          |
-| `mute()`              | -               | Mute the audio                                  |
-| `unmute()`            | -               | Unmute the audio                                |
-| `toggleMute()`        | -               | Toggle mute state                               |
-| `setPlaybackRate(rate)`| `rate: number` | Set playback speed (0.25-4)                     |
-| `resetPlaybackRate()` | -               | Reset playback speed to 1x                      |
-| `increasePlaybackRate()`| -             | Increase playback speed by 0.25x                |
-| `decreasePlaybackRate()`| -             | Decrease playback speed by 0.25x                |
-| `setLoop(loop)`         | `loop: boolean`| Enable or disable audio looping                 |
-| `enableLoop()`          | -             | Enable audio looping                            |
-| `disableLoop()`         | -             | Disable audio looping                           |
-| `toggleLoop()`          | -             | Toggle loop state                               |
+| Method                   | Parameters       | Description                                                          |
+| ------------------------ | ---------------- | -------------------------------------------------------------------- |
+| `play(time?: number)`    | `time?: number`  | Play the audio, optionally from a specific time                      |
+| `pause()`                | -                | Pause the audio                                                      |
+| `stop()`                 | -                | Stop the audio and reset to beginning                                |
+| `setVolume(volume)`      | `volume: number` | Set volume level (0-1)                                               |
+| `mute()`                 | -                | **Deprecated** - Use `setVolume(0)`                                  |
+| `unmute()`               | -                | **Deprecated** - Use `setVolume(value)`                              |
+| `toggleMute()`           | -                | **Deprecated** - Use `setVolume(currentVolume() === 0 ? value : 0)`  |
+| `setPlaybackRate(rate)`  | `rate: number`   | Set playback speed (0.25-4)                                          |
+| `resetPlaybackRate()`    | -                | **Deprecated** - Use `setPlaybackRate(1)`                            |
+| `increasePlaybackRate()` | -                | **Deprecated** - Use `setPlaybackRate(currentPlaybackRate() + 0.25)` |
+| `decreasePlaybackRate()` | -                | **Deprecated** - Use `setPlaybackRate(currentPlaybackRate() - 0.25)` |
+| `setLoop(loop)`          | `loop: boolean`  | Enable or disable audio looping                                      |
+| `enableLoop()`           | -                | **Deprecated** - Use `setLoop(true)`                                 |
+| `disableLoop()`          | -                | **Deprecated** - Use `setLoop(false)`                                |
+| `toggleLoop()`           | -                | **Deprecated** - Use `setLoop(!isLooping())`                         |
+
+## Breaking Changes in v22
+
+- Removed deprecated rounded state aliases: `currentTime`, `duration`, and
+  `playedPercent`.
+- Use `exactCurrentTime`, `exactDuration`, and `exactPlayedPercent` instead.
+- Deprecated convenience methods remain available in v22 and are scheduled for
+  removal in v23: `mute()`, `unmute()`, `toggleMute()`,
+  `resetPlaybackRate()`, `increasePlaybackRate()`, `decreasePlaybackRate()`,
+  `enableLoop()`, `disableLoop()`, and `toggleLoop()`.
+
+## Compatibility Notes
+
+- Angular: `>=22.0.0 <23.0.0`
+- Node.js: `^22.22.3 || ^24.15.0 || >=26.0.0`
+- `provideHttpClient()` is required by the current waveform loader.
+- Large audio files are downloaded and decoded in the browser for waveform generation. Prefer smaller preview files for long podcasts or many players on one page.
 
 ## Contributing
 
